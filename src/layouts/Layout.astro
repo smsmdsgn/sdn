@@ -1,0 +1,1488 @@
+---
+import { getRelativeLocaleUrl } from "astro:i18n";
+import { buildMenu } from "../data/menu.js";
+import { nearestExistingPage, pageExists } from "../data/pages.js";
+import AsideMenu from "../components/AsideMenu.astro";
+import { getBlogPosts } from "../data/blog.js";
+import { DEFAULT_LOCALE, LANGUAGES, SOURCE_LICENSE } from "../i18n/ui.js";
+import { formatDate, useTranslations } from "../i18n/utils.js";
+
+type Label = string | Record<string, string>;
+
+// hideSidebar: サイドバーを出さないページ（about・sitemap・glossary など、カテゴリーに属さないページ）
+// isNotFound: 404 ページ（サイドバーなし・言語切り替えは各言語のトップへ・検索エンジンに登録させない）
+const {
+    title,
+    frontmatter,
+    hideSidebar = false,
+    isNotFound = false,
+} = Astro.props;
+const isMarkdownPage = Boolean(frontmatter);
+const locale = Astro.currentLocale ?? DEFAULT_LOCALE;
+const t = useTranslations(locale);
+// <html lang> の値（BCP 47 の慣例どおり地域部分は大文字）
+const HTML_LANG: Record<string, string> = { "en-us": "en", ja: "ja", "zh-cn": "zh-CN" };
+const htmlLang = HTML_LANG[locale] ?? locale;
+const pathname = Astro.url.pathname;
+const pathNoLocale = pathname.replace(/^\/(en-us|ja|zh-cn)(?=\/)/, "");
+const pathTrim = pathNoLocale.replace(/^\/+/, "");
+const localeLinks = Object.entries(LANGUAGES).map(([code, label]) => ({
+    code,
+    label,
+    // その言語に同じページが無ければ、実在する一番近い上の階層へ（例: 日本語だけのブログ記事 → 各言語のブログ一覧）
+    href: isNotFound
+        ? getRelativeLocaleUrl(code, "")
+        : nearestExistingPage(getRelativeLocaleUrl(code, pathTrim)),
+}));
+const currentLocaleLabel =
+    LANGUAGES[locale as keyof typeof LANGUAGES] ?? LANGUAGES[DEFAULT_LOCALE];
+
+const themeLabel = t("header.theme");
+
+const homeHref = getRelativeLocaleUrl(locale, "");
+const MENU = buildMenu(locale);
+const getMenuLabel = (label: Label) =>
+    typeof label === "string" ? label : label[locale] || label["en-us"];
+const normalizePath = (path: string) =>
+    path.endsWith("/") ? path : `${path}/`;
+const currentPath = normalizePath(Astro.url.pathname);
+const blogPath = normalizePath(`/${locale}/blog/`);
+const isBlogPage = currentPath.startsWith(blogPath);
+const isBlogIndex = currentPath === blogPath;
+const isBlogArticle = isBlogPage && !isBlogIndex;
+// ページ名（Markdown/MDX は frontmatter の title、それ以外は Layout に渡された title）
+const pageTitle = frontmatter?.title ?? title ?? "";
+// <title> は「ページ名 | SDN」。ページ名がなければ「SDN」だけ
+const SITE_NAME = "SDN";
+const documentTitle = pageTitle ? `${pageTitle} | ${SITE_NAME}` : SITE_NAME;
+const blogTitle = pageTitle;
+const blogThumbnail = frontmatter?.thumbnail ?? "";
+const blogAuthor = frontmatter?.author ?? "";
+const blogAuthorUrl = frontmatter?.["author-url"] ?? "";
+const blogCreatedAt = frontmatter?.createdAt ?? "";
+const blogCreatedAtLabel = formatDate(blogCreatedAt, locale);
+const blogPostItems = isBlogArticle ? getBlogPosts(locale) : [];
+const currentPostIndex = blogPostItems.findIndex(
+    (post) => post.url === currentPath,
+);
+const nextPost =
+    currentPostIndex >= 0 ? blogPostItems[currentPostIndex + 1] : undefined;
+const previousPost =
+    currentPostIndex > 0 ? blogPostItems[currentPostIndex - 1] : undefined;
+const pagerLabels = { next: t("blog.next"), previous: t("blog.previous") };
+const isValidHref = (href?: string): href is string =>
+    !!href && href !== "#" && href.startsWith("/");
+type MenuItem = {
+    label: Label;
+    href?: string;
+    children?: MenuItem[];
+};
+type HeaderMenuLink = {
+    desc: string;
+    href: string;
+};
+type HeaderMenuGroup = {
+    title: string;
+    items: { label: string; href: string }[];
+};
+type HeaderMenuSection = {
+    label: string;
+    link?: HeaderMenuLink;
+    groups: HeaderMenuGroup[];
+};
+type BreadcrumbItem = {
+    name: string;
+    href?: string;
+};
+const findBreadcrumbTrail = (items: MenuItem[]): MenuItem[] | null => {
+    for (const item of items) {
+        if (item.children?.length) {
+            const childTrail = findBreadcrumbTrail(item.children);
+            if (childTrail) return [item, ...childTrail];
+        }
+        if (isValidHref(item.href)) {
+            const itemPath = normalizePath(item.href);
+            if (currentPath.startsWith(itemPath)) return [item];
+        }
+    }
+    return null;
+};
+const breadcrumbTrail = findBreadcrumbTrail(MENU) ?? [];
+const fallbackBreadcrumbTrail: BreadcrumbItem[] =
+    breadcrumbTrail.length === 0 && currentPath.startsWith(blogPath)
+        ? [
+                {
+                    name: t("nav.blog"),
+                    href: blogPath,
+                },
+            ]
+        : [];
+const blogArticleBreadcrumb: BreadcrumbItem[] =
+    isBlogArticle && blogTitle
+        ? [
+                {
+                    name: blogTitle,
+                },
+            ]
+        : [];
+const breadcrumbItems = [
+    { name: "SDN", href: homeHref },
+    ...breadcrumbTrail.map((item) => ({
+        name: getMenuLabel(item.label),
+        // ページが実在しない階層（未作成・未翻訳）はリンクにしない
+        href:
+            isValidHref(item.href) && pageExists(item.href)
+                ? item.href
+                : undefined,
+    })),
+    ...fallbackBreadcrumbTrail,
+    ...blogArticleBreadcrumb,
+];
+const isHome = currentPath === `/${locale}/`;
+const shouldHideSidebar = isBlogPage || isHome || hideSidebar || isNotFound;
+const shouldUseNoAsideLayout = shouldHideSidebar && !isBlogArticle;
+const heroLead = {
+    pre: t("hero.lead.pre"),
+    mid: t("hero.lead.mid"),
+    post: t("hero.lead.post"),
+    end: t("hero.lead.end"),
+};
+
+const FOOTER_SOCIALS = [
+    { id: "github", label: "GitHub", href: "#" },
+    { id: "bluesky", label: "Bluesky", href: "#" },
+    { id: "x", label: "X", href: "#" },
+    { id: "mastodon", label: "Mastodon", href: "#" },
+    { id: "rss", label: "RSS", href: "#" },
+];
+
+const FOOTER_LINK_GROUPS = [
+    {
+        title: "SDN",
+        items: [
+            { label: "About", href: getRelativeLocaleUrl(locale, "about") },
+            { label: "Blog", href: getRelativeLocaleUrl(locale, "blog") },
+            { label: "Careers", href: "#", external: true },
+            { label: "Advertise with us", href: "#" },
+            { label: "SDN Plus", href: "#" },
+            { label: "Product Help", href: "#", external: true },
+        ],
+    },
+    {
+        title: "Contribute",
+        items: [
+            {
+                label: "Writing guidelines",
+                href: getRelativeLocaleUrl(locale, "writing-guidelines"),
+            },
+            { label: "SDN Community", href: "#" },
+            { label: "Community resources", href: "#" },
+            { label: "SDN on GitHub", href: "https://github.com/", external: true },
+            { label: "SDN Discord", href: "#", external: true },
+        ],
+    },
+    {
+        title: "Developers",
+        items: [
+            { label: "Glossary", href: getRelativeLocaleUrl(locale, "glossary") },
+            { label: "Web technologies", href: "#" },
+            { label: "Learn web development", href: "#" },
+            { label: "Guides", href: "#" },
+            { label: "Tutorials", href: "#" },
+            { label: "Sitemap", href: getRelativeLocaleUrl(locale, "sitemap") },
+        ],
+    },
+];
+
+// 著作権表示の年: 開始年のみ、または「開始年–ビルドした年」（例: 2026 / 2026–2027）
+const COPYRIGHT_START_YEAR = 2026;
+const buildYear = new Date().getFullYear();
+const copyrightYears =
+    buildYear > COPYRIGHT_START_YEAR
+        ? `${COPYRIGHT_START_YEAR}–${buildYear}`
+        : `${COPYRIGHT_START_YEAR}`;
+
+const FOOTER_LEGAL_LINKS = [
+    { label: t("footer.legal.privacy"), href: "#" },
+    { label: t("footer.legal.telemetry"), href: "#" },
+    { label: t("footer.legal.legal"), href: "#" },
+    { label: t("footer.legal.guidelines"), href: "#" },
+];
+
+// 「See all...」はカテゴリーのトップへ。それ以外はページ未作成のため仮リンク（#）
+const MENU_LINKS_HTML_GUIDE = [
+    { label: t("menu.about", { label: "HTML" }), href: "#" },
+    { label: t("header.menu.html.dateTimeFormats"), href: "#" },
+    { label: t("header.menu.html.responsiveImages"), href: "#" },
+    { label: "See all...", href: getRelativeLocaleUrl(locale, "html") },
+];
+
+const MENU_LINKS_HTML_REFERENCE = [
+    { label: t("header.menu.html.elements"), href: "#" },
+    { label: t("header.menu.html.attributes"), href: "#" },
+    { label: t("header.menu.html.globalAttributes"), href: "#" },
+    { label: "See all...", href: getRelativeLocaleUrl(locale, "html") },
+];
+
+const MENU_LINKS_HTML_MARKUP_LANGUAGES = [
+    { label: "SVG", href: "#" },
+    { label: "MathML", href: "#" },
+    { label: "XML", href: "#" },
+];
+
+const MENU_LINKS_CSS_GUIDE = [
+    { label: t("header.menu.css.boxModel"), href: "#" },
+    { label: t("header.menu.css.animations"), href: "#" },
+    { label: t("header.menu.css.flexbox"), href: "#" },
+    { label: t("header.menu.css.color"), href: "#" },
+    { label: "See all...", href: getRelativeLocaleUrl(locale, "css") },
+];
+
+const MENU_LINKS_CSS_REFERENCE = [
+    { label: t("header.menu.css.properties"), href: "#" },
+    { label: t("header.menu.css.selectors"), href: "#" },
+    { label: t("header.menu.css.functions"), href: "#" },
+    { label: "See all...", href: getRelativeLocaleUrl(locale, "css") },
+];
+
+const MENU_LINKS_JS_TUTORIAL = [
+    { label: t("header.menu.js.beginner"), href: "#" },
+    { label: t("header.menu.js.intermediate"), href: "#" },
+    { label: t("header.menu.js.advanced"), href: "#" },
+];
+
+const MENU_LINKS_JS_REFERENCE = [
+    { label: t("header.menu.js.builtInObjects"), href: "#" },
+    { label: t("header.menu.js.expressionsOperators"), href: "#" },
+    { label: t("header.menu.js.statementsDeclarations"), href: "#" },
+    { label: t("header.menu.js.functions"), href: "#" },
+    { label: t("header.menu.js.classes"), href: "#" },
+    { label: t("header.menu.js.regularExpressions"), href: "#" },
+    { label: t("header.menu.js.errors"), href: "#" },
+    { label: "See all...", href: getRelativeLocaleUrl(locale, "js") },
+];
+
+// API 名は固有名詞のため 3 言語共通
+const MENU_LINKS_JS_WEB_APIS = [
+    { label: "File system API", href: "#" },
+    { label: "Fetch API", href: "#" },
+    { label: "Geolocation API", href: "#" },
+    { label: "HTML DOM API", href: "#" },
+    { label: "Push API", href: "#" },
+    { label: "Service worker API", href: "#" },
+    { label: "See all...", href: getRelativeLocaleUrl(locale, "js") },
+];
+
+// 技術名・分野名は 3 言語共通の英語表記
+const MENU_LINKS_OTHERS_INFRASTRUCTURE = [
+    { label: "DNS", href: "#" },
+    { label: "CDN", href: "#" },
+    { label: "HTTP", href: "#" },
+    { label: "Web Server", href: "#" },
+    { label: "Database", href: "#" },
+];
+
+const MENU_LINKS_OTHERS_QUALITY = [
+    { label: "Accessibility", href: "#" },
+    { label: "Performance", href: "#" },
+    { label: "SEO", href: "#" },
+    { label: "Security", href: "#" },
+    { label: "Privacy", href: "#" },
+];
+
+const MENU_SECTIONS: HeaderMenuSection[] = [
+    {
+        label: "HTML",
+        link: { desc: "Markup language", href: `/${locale}/html/` },
+        groups: [
+            { title: "GUIDE", items: MENU_LINKS_HTML_GUIDE },
+            { title: "REFERENCE", items: MENU_LINKS_HTML_REFERENCE },
+            {
+                title: "MARKUP LANGUAGES",
+                items: MENU_LINKS_HTML_MARKUP_LANGUAGES,
+            },
+        ],
+    },
+    {
+        label: "CSS",
+        link: { desc: "Styling language", href: `/${locale}/css/` },
+        groups: [
+            { title: "GUIDE", items: MENU_LINKS_CSS_GUIDE },
+            { title: "REFERENCE", items: MENU_LINKS_CSS_REFERENCE },
+        ],
+    },
+    {
+        label: "JavaScript",
+        link: { desc: "Scripting language", href: `/${locale}/js/` },
+        groups: [
+            { title: "TUTORIAL", items: MENU_LINKS_JS_TUTORIAL },
+            { title: "REFERENCE", items: MENU_LINKS_JS_REFERENCE },
+            { title: "WEB APIs", items: MENU_LINKS_JS_WEB_APIS },
+        ],
+    },
+    {
+        label: "Others",
+        groups: [
+            { title: "INFRASTRUCTURE", items: MENU_LINKS_OTHERS_INFRASTRUCTURE },
+            { title: "QUALITY", items: MENU_LINKS_OTHERS_QUALITY },
+        ],
+    },
+];
+
+const MENU_EXTRA = [
+    { label: "Blog", href: getRelativeLocaleUrl(locale, "blog") },
+    { label: "About", href: getRelativeLocaleUrl(locale, "about") },
+];
+---
+
+<!doctype html>
+<html
+    lang={htmlLang}
+    class:list={{ "is-home": isHome, "is-blog-article": isBlogArticle }}
+>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width" />
+        {isNotFound ? <meta name="robots" content="noindex" /> : null}
+        <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+        <link rel="icon" href="/assets/favicon.ico" sizes="any" />
+        <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png" />
+        <link rel="stylesheet" href="/assets/css/reset.css" />
+        <link rel="stylesheet" href="/assets/css/style.css" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap"
+            rel="stylesheet"
+        />
+        <title>{documentTitle}</title>
+    </head>
+    <body>
+        <div class="ad ad--top">
+            <div class="ad__wrapper">
+                <div class="ad__top-inner">
+                    <a href="#" class="ad__body">
+                        <img
+                            src="/assets/img/adicon-smartphone.avif"
+                            alt="Smartphone icon"
+                        />
+                        <p>
+                            Lorem ipsum dolor sit amet, consectetur adipiscing
+                            elit. Donec a ultrices est. Pellentesque vehicula
+                            condimentum ultrices!
+                        </p>
+                        <span class="ad__cta">Try free now →</span>
+                    </a>
+                    <a href="#" class="ad__label">{t("ad.label")}</a>
+                    <button
+                        type="button"
+                        class="ad__close-btn"
+                        aria-label="Close ad"
+                    >
+                        <span class="sr-only">Ad Close</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="layout-header">
+            <header class="header">
+                <div class="header__top">
+                    <a
+                        href={getRelativeLocaleUrl(locale, "")}
+                        class="header__logo"
+                    >
+                        <picture class="theme-swap-logo">
+                            <source
+                                srcset="/assets/img/logo-sdn-color-darkmode.svg"
+                                media="(prefers-color-scheme: dark)"
+                            />
+                            <img
+                                src="/assets/img/logo-sdn-color.svg"
+                                alt="SDN"
+                            />
+                        </picture>
+                    </a>
+                    <div class="header__search">
+                        <button
+                            type="button"
+                            class="header__search-btn"
+                            aria-expanded="false"
+                        >
+                            <span class="sr-only">Search</span>
+                        </button>
+                        <div class="header__search-body">
+                            <div class="header__search-body-inner">
+                                <form role="search">
+                                    <input
+                                        type="search"
+                                        name="query"
+                                        placeholder="Search"
+                                    />
+                                </form>
+                                <button
+                                    type="button"
+                                    class="header__search-close-btn"
+                                >
+                                    <span class="sr-only">Close</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="header__hamburger">
+                        <button
+                            type="button"
+                            class="header__hamburger-btn"
+                            aria-expanded="false"
+                        >
+                            <span class="sr-only">Hamburger Menu</span>
+                        </button>
+                        <nav class="header__menu">
+                            <ul class="header__menu-list">
+                                {
+                                    MENU_SECTIONS.map((section) => (
+                                        <li>
+                                            <details class="header__menu-item">
+                                                <summary class="header__menu-item-title">
+                                                    {section.label}
+                                                </summary>
+                                                <div class="header__menu-item-body">
+                                                    {section.link ? (
+                                                        <p class="header__menu-item-lang">
+                                                            <a
+                                                                href={
+                                                                    section.link
+                                                                        .href
+                                                                }
+                                                            >
+                                                                {`${section.label}: ${section.link.desc}`}
+                                                            </a>
+                                                        </p>
+                                                    ) : null}
+                                                    <dl>
+                                                        {section.groups.map(
+                                                            (group) => (
+                                                                <div class="header__menu-item-part">
+                                                                    <dt>
+                                                                        {
+                                                                            group.title
+                                                                        }
+                                                                    </dt>
+                                                                    <dd>
+                                                                        <ul>
+                                                                            {group.items.map(
+                                                                                (
+                                                                                    item,
+                                                                                ) => (
+                                                                                    <li>
+                                                                                        <a
+                                                                                            href={
+                                                                                                item.href
+                                                                                            }
+                                                                                        >
+                                                                                            {
+                                                                                                item.label
+                                                                                            }
+                                                                                        </a>
+                                                                                    </li>
+                                                                                ),
+                                                                            )}
+                                                                        </ul>
+                                                                    </dd>
+                                                                </div>
+                                                            ),
+                                                        )}
+                                                    </dl>
+                                                </div>
+                                            </details>
+                                        </li>
+                                    ))
+                                }
+                                    {
+                                        MENU_EXTRA.map((item) => (
+                                            <li>
+                                                <a
+                                                    href={item.href}
+                                                    class="header__menu-item-title--solo"
+                                                >
+                                                    {item.label}
+                                                </a>
+                                            </li>
+                                        ))
+                                    }
+                            </ul>
+                            <a href="#" class="header__menu-item-title--solo"
+                                >Logout</a
+                            >
+                        </nav>
+                    </div>
+                </div>
+                <div class="header__bottom">
+                    {
+                        shouldHideSidebar ? null : (
+                            <div class="header__toggle-sidebar">
+                                <button
+                                    type="button"
+                                    class="header__toggle-sidebar-btn"
+                                    aria-expanded="false"
+                                >
+                                    <span class="sr-only">Toggle Sidebar</span>
+                                </button>
+                            </div>
+                        )
+                    }
+                    <nav class="header__breadcrumb" aria-label="Breadcrumb">
+                        <ol
+                            class="header__breadcrumb-list"
+                            itemscope
+                            itemtype="https://schema.org/BreadcrumbList"
+                        >
+                            {
+                                breadcrumbItems.map((item, index) => {
+                                    const isLast =
+                                        index === breadcrumbItems.length - 1;
+                                    const isSingle =
+                                        breadcrumbItems.length === 1;
+                                    const isBlogIndexCrumb =
+                                        isBlogIndex && item.href === blogPath;
+                                    return (
+                                        <li
+                                            itemprop="itemListElement"
+                                            itemscope
+                                            itemtype="https://schema.org/ListItem"
+                                            aria-current={
+                                                isLast ? "page" : undefined
+                                            }
+                                        >
+                                            {item.href &&
+                                            (!isLast ||
+                                                isSingle ||
+                                                isBlogIndexCrumb) ? (
+                                                <a
+                                                    itemprop="item"
+                                                    href={item.href}
+                                                >
+                                                    <span itemprop="name">
+                                                        {item.name}
+                                                    </span>
+                                                </a>
+                                            ) : (
+                                                <span itemprop="name">
+                                                    {item.name}
+                                                </span>
+                                            )}
+                                            <meta
+                                                itemprop="position"
+                                                content={String(index + 1)}
+                                            />
+                                        </li>
+                                    );
+                                })
+                            }
+                        </ol>
+                    </nav>
+
+                    <nav class="header__theme">
+                        <button
+                            type="button"
+                            class="header__theme-btn"
+                            aria-expanded="false"
+                        >
+                            <span class="header__theme-label">{themeLabel}</span>
+                            <span class="sr-only">Switch Color Theme</span>
+                        </button>
+                        <ul>
+                            <li>
+                                <button
+                                    type="button"
+                                    data-theme="system"
+                                    class="header__theme-option-btn"
+                                >
+                                    {t("theme.system")}
+                                </button>
+                            </li>
+                            <li>
+                                <button
+                                    type="button"
+                                    data-theme="light"
+                                    class="header__theme-option-btn"
+                                >
+                                    {t("theme.light")}
+                                </button>
+                            </li>
+                            <li>
+                                <button
+                                    type="button"
+                                    data-theme="dark"
+                                    class="header__theme-option-btn"
+                                >
+                                    {t("theme.dark")}
+                                </button>
+                            </li>
+                        </ul>
+                    </nav>
+                    <nav class="header__lang">
+                        <button
+                            type="button"
+                            class="header__lang-btn"
+                            aria-expanded="false"
+                        >
+                            <span class="header__lang-current"
+                                >{currentLocaleLabel}</span
+                            >
+                            <span class="sr-only">Select Language</span>
+                        </button>
+                        <ul>
+                            {
+                                localeLinks.map((item) => (
+                                    <li>
+                                        <a href={item.href}>{item.label}</a>
+                                    </li>
+                                ))
+                            }
+                        </ul>
+                    </nav>
+                </div>
+            </header>
+        </div>
+
+        {
+            isHome ? (
+                <section class="hero">
+                    <div class="hero__inner">
+                        <h1 class="hero__title">
+                            Resources for Shimashima,
+                            <br />
+                            by Shimashima
+                        </h1>
+                        <p class="hero__lead">
+                            {heroLead.pre}
+                            <a href={`/${locale}/html/`}>HTML</a>
+                            {locale === "en-us" ? ", " : "、"}
+                            <a href={`/${locale}/css/`}>CSS</a>
+                            {heroLead.mid}
+                            <a href={`/${locale}/js/`}>JavaScript</a>
+                            {heroLead.post}
+                            <a
+                                href="https://developer.mozilla.org/"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="external-link"
+                            >
+                                MDN Web Docs
+                            </a>
+                            {heroLead.end}
+                        </p>
+                        <button type="button" class="hero__search-btn">
+                            <span>Search</span>
+                        </button>
+                    </div>
+                </section>
+            ) : null
+        }
+
+        <div class="layout-main">
+            <div
+                class="layout-main-wrapper"
+                class:list={{
+                    "layout-main-wrapper--no-aside": shouldUseNoAsideLayout,
+                }}
+            >
+                {shouldHideSidebar ? null : <AsideMenu />}
+                <main class="main">
+                    {
+                        isMarkdownPage ? (
+                            <article class="article">
+                                {isBlogArticle ? (
+                                    <section class="article__info">
+                                        <span class="article__info-thumbnail-wrap">
+                                            {blogThumbnail ? (
+                                                <img
+                                                    src={blogThumbnail}
+                                                    alt={blogTitle}
+                                                    class="article__info-thumbnail"
+                                                    width="1200"
+                                                    height="630"
+                                                    loading="eager"
+                                                    decoding="async"
+                                                />
+                                            ) : (
+                                                <span
+                                                    class="article__info-thumbnail-placeholder"
+                                                    aria-hidden="true"
+                                                />
+                                            )}
+                                        </span>
+                                        {blogTitle ? (
+                                            <h1 class="article__info-title">
+                                                {blogTitle}
+                                            </h1>
+                                        ) : null}
+                                        <div class="blog-item__info">
+                                            {blogAuthor ? (
+                                                blogAuthorUrl ? (
+                                                    <a
+                                                        href={blogAuthorUrl}
+                                                        class="blog-item__author"
+                                                        target="_blank"
+                                                        rel="noopener noreferrer nofollow"
+                                                    >
+                                                        <img
+                                                            src="/assets/img/author/author-shimashima.svg"
+                                                            alt={`Author ${blogAuthor}`}
+                                                        />
+                                                        <span class="external-link">
+                                                            {blogAuthor}
+                                                        </span>
+                                                    </a>
+                                                ) : (
+                                                    <span class="blog-item__author">
+                                                        <img
+                                                            src="/assets/img/author/author-shimashima.svg"
+                                                            alt={`Author ${blogAuthor}`}
+                                                        />
+                                                        <span>
+                                                            {blogAuthor}
+                                                        </span>
+                                                    </span>
+                                                )
+                                            ) : null}
+                                            {blogCreatedAtLabel ? (
+                                                <time
+                                                    class="blog-item__date"
+                                                    datetime={blogCreatedAt}
+                                                >
+                                                    {blogCreatedAtLabel}
+                                                </time>
+                                            ) : null}
+                                        </div>
+                                    </section>
+                                ) : null}
+                                <slot />
+                                {isBlogArticle && (nextPost || previousPost) ? (
+                                    <nav
+                                        class="article__pager"
+                                        aria-label="Post navigation"
+                                    >
+                                        {previousPost ? (
+                                            <div class="article__pager--previous">
+                                                <a
+                                                    class="article__pager-link article__pager-link--previous"
+                                                    href={previousPost.url}
+                                                >
+                                                    <span class="article__pager-label">
+                                                        {pagerLabels.previous}
+                                                    </span>
+                                                    <span class="article__pager-title">
+                                                        {previousPost.title}
+                                                    </span>
+                                                </a>
+                                            </div>
+                                        ) : null}
+                                        {nextPost ? (
+                                            <div class="article__pager--next">
+                                                <a
+                                                    class="article__pager-link article__pager-link--next"
+                                                    href={nextPost.url}
+                                                >
+                                                    <span class="article__pager-label">
+                                                        {pagerLabels.next}
+                                                    </span>
+                                                    <span class="article__pager-title">
+                                                        {nextPost.title}
+                                                    </span>
+                                                </a>
+                                            </div>
+                                        ) : null}
+                                    </nav>
+                                ) : null}
+                            </article>
+                        ) : (
+                            <slot />
+                        )
+                    }
+                </main>
+            </div>
+        </div>
+
+        <div class="ad ad--bottom">
+            <div class="ad__wrapper">
+                <div class="ad__bottom-inner">
+                    <a href="#" class="ad__body">
+                        <picture>
+                            <source
+                                media="(min-width: 800px)"
+                                srcset="/assets/img/banner-01-pc.jpg"
+                                width="728"
+                                height="90"
+                            />
+                            <img
+                                src="/assets/img/banner-01-mobile.jpg"
+                                alt="Advertisement banner"
+                                width="300"
+                                height="250"
+                            />
+                        </picture>
+                    </a>
+                    <a href="#" class="ad__label">{t("ad.label")}</a>
+                    <button
+                        type="button"
+                        class="ad__close-btn"
+                        aria-label="Close ad"
+                    >
+                        <span class="sr-only">Ad Close</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="layout-footer">
+            <footer class="footer">
+                <div class="footer__content-wrapper">
+                    <div class="footer__top">
+                        <div class="footer__top-inner">
+                            <div class="footer__intro">
+                                <a class="footer__logo" href={homeHref}>
+                                    <picture class="theme-swap-logo">
+                                        <source
+                                            srcset="/assets/img/logo-sdn-darkmode.svg"
+                                            media="(prefers-color-scheme: dark)"
+                                        />
+                                        <img
+                                            src="/assets/img/logo-sdn.svg"
+                                            alt="SDN"
+                                        />
+                                    </picture>
+                                </a>
+                                <p>{t("footer.tagline")}</p>
+                            </div>
+                            <ul class="footer__socials">
+                                {
+                                    FOOTER_SOCIALS.map((item) => (
+                                        <li>
+                                            <a
+                                                data-icon={item.id}
+                                                href={item.href}
+                                            >
+                                                <span class="sr-only">
+                                                    {item.label}
+                                                </span>
+                                            </a>
+                                        </li>
+                                    ))
+                                }
+                            </ul>
+                            <div class="footer__links-wrapper">
+                                {
+                                    FOOTER_LINK_GROUPS.map((group) => (
+                                        <div class="footer__link-group">
+                                            <h3 class="footer__link-title">
+                                                {group.title}
+                                            </h3>
+                                            <ul class="footer__links">
+                                                {group.items.map((item) => (
+                                                    <li>
+                                                        <a
+                                                            href={item.href}
+                                                            class={
+                                                                item.external
+                                                                    ? "external-link"
+                                                                    : undefined
+                                                            }
+                                                        >
+                                                            {item.label}
+                                                        </a>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    ))
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    <div class="footer__bottom">
+                        <div class="footer__bottom-inner">
+                            <a class="footer__logo" href="https://shimashima.design">
+                                <picture class="theme-swap-logo">
+                                    <source
+                                        srcset="/assets/img/logo-shimashima-darkmode.svg"
+                                        media="(prefers-color-scheme: dark)"
+                                    />
+                                    <img
+                                        src="/assets/img/logo-shimashima.svg"
+                                        alt="Shimashima"
+                                    />
+                                </picture>
+                            </a>
+                            <ul class="footer__legal-links">
+                                {
+                                    FOOTER_LEGAL_LINKS.map((item) => (
+                                        <li>
+                                            <a
+                                                class="external-link"
+                                                href={item.href}
+                                            >
+                                                {item.label}
+                                            </a>
+                                        </li>
+                                    ))
+                                }
+                            </ul>
+                            <small class="footer__legal-text">
+                                <p>
+                                    © {copyrightYears} SHIMASHIMA DESIGN. {t("footer.disclaimer")}{t("sentence.separator")}{t("footer.license.before")}<a
+                                        href={SOURCE_LICENSE.url}
+                                        class="external-link"
+                                        target="_blank"
+                                        rel="noopener noreferrer">{SOURCE_LICENSE.name}</a
+                                    >{t("footer.license.after")}
+                                </p>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </footer>
+        </div>
+
+        <script
+            is:inline
+            data-ad-label={t("ad.label")}
+            data-toc-title={t("toc.title")}
+        >
+            const toggleSidebar = document.querySelector(".aside-menu");
+            const toggleSidebarBtn = document.querySelector(
+                ".header__toggle-sidebar-btn",
+            );
+            const toggleSidebarCloseBtn = document.querySelector(
+                ".aside-menu__close-btn",
+            );
+            const adTop = document.querySelector(".ad--top");
+            const search = document.querySelector(".header__search");
+            const searchBtn = document.querySelector(".header__search-btn");
+            const searchCloseBtn = document.querySelector(
+                ".header__search-close-btn",
+            );
+            const heroSearchBtn = document.querySelector(".hero__search-btn");
+            const hamburger = document.querySelector(".header__hamburger");
+            const hamburgerBtn = document.querySelector(
+                ".header__hamburger-btn",
+            );
+            const themeNav = document.querySelector(".header__theme");
+            const themeBtn = document.querySelector(".header__theme-btn");
+            const langNav = document.querySelector(".header__lang");
+            const langBtn = document.querySelector(".header__lang-btn");
+
+            const osDark = window.matchMedia("(prefers-color-scheme: dark)");
+            const logoSources = Array.from(
+                document.querySelectorAll(".theme-swap-logo source"),
+            );
+            const THEME_KEY = "preferredTheme";
+            const LOCALE_KEY = "preferredLocale";
+            // 広告ラベルの文言（言語別。script タグの data-ad-label から受け取る）
+            const AD_LABEL = document.currentScript?.dataset.adLabel || "AD";
+            // 目次の見出し（言語別。script タグの data-toc-title から受け取る）
+            const TOC_TITLE =
+                document.currentScript?.dataset.tocTitle || "Table of Contents";
+            const appendTocAd = (tocNav) => {
+                const container = tocNav?.parentElement;
+                if (!container) return;
+                const ad = document.createElement("div");
+                ad.className = "ad ad--side";
+                const body = document.createElement("a");
+                body.className = "ad__body";
+                body.href = "#";
+                const img = document.createElement("img");
+                img.src = "/assets/img/banner-02.jpg";
+                img.alt = "Advertisement banner";
+                const p1 = document.createElement("p");
+                const strong = document.createElement("strong");
+                strong.textContent =
+                    "Nunc vestibulum tincidunt velit id convallis.";
+                p1.appendChild(strong);
+                const p2 = document.createElement("p");
+                p2.textContent =
+                    "Sed laoreet, orci eu pretium tempor, enim est gravida magna, id lacinia nulla nisl dignissim augue.";
+                const p3 = document.createElement("p");
+                // const cta = document.createElement("span");
+                p3.className = "ad__cta external-link";
+                p3.textContent = "Let's Try";
+                // p3.appendChild(cta);
+                const content = document.createElement("div");
+                content.className = "ad__content";
+                content.appendChild(p1);
+                content.appendChild(p2);
+                content.appendChild(p3);
+                body.appendChild(img);
+                body.appendChild(content);
+                ad.appendChild(body);
+                const adLabel = document.createElement("a");
+                adLabel.className = "ad__label";
+                adLabel.href = "#";
+                adLabel.textContent = AD_LABEL;
+                ad.appendChild(adLabel);
+                const closeBtn = document.createElement("button");
+                closeBtn.type = "button";
+                closeBtn.className = "ad__close-btn";
+                closeBtn.setAttribute("aria-label", "Close ad");
+                const closeText = document.createElement("span");
+                closeText.className = "sr-only";
+                closeText.textContent = "Ad Close";
+                closeBtn.appendChild(closeText);
+                ad.appendChild(closeBtn);
+                container.appendChild(ad);
+            };
+
+            // 広告がビューポート内にある時だけ高さを反映
+            // const setAdHeight = (visible) => {
+            // 	const height = adTop && visible ? adTop.offsetHeight : 0;
+            // 	document.documentElement.style.setProperty(
+            // 		"--height-ad-top",
+            // 		`${height}px`,
+            // 	);
+            // };
+
+            // if (adTop) {
+            // 	const observer = new IntersectionObserver(
+            // 		([entry]) => {
+            // 			setAdHeight(entry.isIntersecting);
+            // 		},
+            // 		{ threshold: 0 },
+            // 	);
+            // 	observer.observe(adTop);
+
+            // 	window.addEventListener("resize", () => {
+            // 		// 再計測（表示中なら新しい高さを反映）
+            // 		const rect = adTop.getBoundingClientRect();
+            // 		const visible =
+            // 			rect.bottom > 0 && rect.top < window.innerHeight;
+            // 		setAdHeight(visible);
+            // 	});
+            // } else {
+            // 	setAdHeight(false);
+            // }
+
+            // ダークモードがオンのときの処理
+            function darkModeOn() {
+                document.documentElement.setAttribute("data-theme", "dark");
+                logoSources.forEach(function (node) {
+                    node.setAttribute("media", "all");
+                });
+            }
+
+            // ダークモードがオフのときの処理
+            function darkModeOff() {
+                document.documentElement.setAttribute("data-theme", "light");
+                logoSources.forEach(function (node) {
+                    node.setAttribute("media", "not all");
+                });
+            }
+
+            // ロード時の状況に応じて切り替え
+            const savedTheme = localStorage.getItem(THEME_KEY) || "system";
+            if (savedTheme === "dark") {
+                darkModeOn();
+            } else if (savedTheme === "light") {
+                darkModeOff();
+            } else if (osDark.matches) {
+                darkModeOn();
+            } else {
+                darkModeOff();
+            }
+
+            // OSの設定変更に応じて切り替え
+            osDark.addEventListener("change", function () {
+                if (osDark.matches) {
+                    darkModeOn();
+                } else {
+                    darkModeOff();
+                }
+            });
+
+            // ボタン操作で切り替え
+            document
+                .querySelectorAll(".header__theme [data-theme]")
+                .forEach(function (button) {
+                    button.addEventListener("click", function () {
+                        const value = button.dataset.theme;
+                        localStorage.setItem(THEME_KEY, value);
+                        if (value === "dark") {
+                            darkModeOn();
+                        } else if (value === "light") {
+                            darkModeOff();
+                        } else {
+                            // system
+                            if (osDark.matches) {
+                                darkModeOn();
+                            } else {
+                                darkModeOff();
+                            }
+                        }
+                        themeNav.classList.remove("is-open");
+                        themeBtn.setAttribute("aria-expanded", "false");
+                    });
+                });
+
+            // 言語選択を保存
+            document
+                .querySelectorAll(".header__lang a")
+                .forEach(function (link) {
+                    link.addEventListener("click", function () {
+                        const href = link.getAttribute("href") || "";
+                        const match = href.match(/^\/(en-us|ja|zh-cn)(?=\/)/);
+                        if (match) {
+                            localStorage.setItem(LOCALE_KEY, match[1]);
+                        }
+                    });
+                });
+
+            // メニューの開閉（theme/langは排他）
+            const closeTheme = () => {
+                themeNav.classList.remove("is-open");
+                themeBtn.setAttribute("aria-expanded", "false");
+            };
+            const closeLang = () => {
+                langNav.classList.remove("is-open");
+                langBtn.setAttribute("aria-expanded", "false");
+            };
+
+            themeBtn.addEventListener("click", function () {
+                const willOpen = !themeNav.classList.contains("is-open");
+                if (willOpen) {
+                    closeLang();
+                }
+                themeNav.classList.toggle("is-open", willOpen);
+                themeBtn.setAttribute("aria-expanded", String(willOpen));
+            });
+
+            langBtn.addEventListener("click", function () {
+                const willOpen = !langNav.classList.contains("is-open");
+                if (willOpen) {
+                    closeTheme();
+                }
+                langNav.classList.toggle("is-open", willOpen);
+                langBtn.setAttribute("aria-expanded", String(willOpen));
+            });
+
+            if (toggleSidebar && toggleSidebarBtn) {
+                const mediaQuery = window.matchMedia("(max-width: 799px)");
+                const sidebarAlwaysOpenQuery = window.matchMedia(
+                    "(min-width: 1072px)",
+                );
+                const isHome =
+                    document.documentElement.classList.contains("is-home");
+
+                const syncSidebarState = () => {
+                    const shouldForceOpen = sidebarAlwaysOpenQuery.matches;
+                    if (shouldForceOpen && !isHome) {
+                        toggleSidebar.classList.add("is-open");
+                        toggleSidebarBtn.setAttribute("aria-expanded", "true");
+                    } else {
+                        toggleSidebar.classList.remove("is-open");
+                        toggleSidebarBtn.setAttribute("aria-expanded", "false");
+                    }
+                    const isOpen = toggleSidebar.classList.contains("is-open");
+                    document.body.classList.toggle(
+                        "is-scroll-locked",
+                        isOpen && mediaQuery.matches,
+                    );
+                };
+
+                // toggle-sidebarは独立
+                toggleSidebarBtn.addEventListener("click", function () {
+                    const shouldForceOpen = sidebarAlwaysOpenQuery.matches;
+                    if (shouldForceOpen && !isHome) {
+                        toggleSidebar.classList.add("is-open");
+                        toggleSidebarBtn.setAttribute("aria-expanded", "true");
+                        document.body.classList.remove("is-scroll-locked");
+                        return;
+                    }
+                    const willOpen =
+                        !toggleSidebar.classList.contains("is-open");
+                    toggleSidebar.classList.toggle("is-open", willOpen);
+                    toggleSidebarBtn.setAttribute(
+                        "aria-expanded",
+                        String(willOpen),
+                    );
+                    const isMobile = mediaQuery.matches;
+                    document.body.classList.toggle(
+                        "is-scroll-locked",
+                        willOpen && isMobile,
+                    );
+                });
+                toggleSidebarCloseBtn?.addEventListener("click", function () {
+                    toggleSidebar.classList.remove("is-open");
+                    toggleSidebarBtn.setAttribute("aria-expanded", "false");
+                    document.body.classList.remove("is-scroll-locked");
+                });
+
+                // リサイズでブレイクを跨いだときにロック状態を更新
+                mediaQuery.addEventListener("change", syncSidebarState);
+                sidebarAlwaysOpenQuery.addEventListener(
+                    "change",
+                    syncSidebarState,
+                );
+                syncSidebarState();
+            }
+
+            // ハンバーガーメニュー開閉
+            hamburgerBtn.addEventListener("click", function () {
+                const willOpen = !hamburger.classList.contains("is-open");
+                hamburger.classList.toggle("is-open", willOpen);
+                hamburgerBtn.setAttribute("aria-expanded", String(willOpen));
+                document.body.classList.toggle("is-scroll-locked", willOpen);
+            });
+
+            // 検索フォーム開閉
+            searchBtn.addEventListener("click", function () {
+                const willOpen = !search.classList.contains("is-open");
+                search.classList.toggle("is-open", willOpen);
+                searchBtn.setAttribute("aria-expanded", String(willOpen));
+                document.body.classList.toggle("is-scroll-locked", willOpen);
+            });
+
+            const closeSearch = () => {
+                search.classList.remove("is-open");
+                searchBtn.setAttribute("aria-expanded", "false");
+                document.body.classList.remove("is-scroll-locked");
+            };
+
+            searchCloseBtn.addEventListener("click", closeSearch);
+
+            // 検索フォーム以外（背景）をクリック・タップしたら閉じる。
+            // 入力欄で文字を選択したままフォームの外で離した場合は閉じないよう、押し始めの位置も確認する
+            const searchBody = search.querySelector(".header__search-body");
+            const searchForm = searchBody.querySelector("form");
+            let pressStartedOutsideForm = false;
+            searchBody.addEventListener("pointerdown", function (event) {
+                pressStartedOutsideForm = !searchForm.contains(event.target);
+            });
+            searchBody.addEventListener("click", function (event) {
+                if (pressStartedOutsideForm && !searchForm.contains(event.target)) {
+                    closeSearch();
+                }
+                pressStartedOutsideForm = false;
+            });
+
+            // Esc キーでも閉じる
+            document.addEventListener("keydown", function (event) {
+                if (event.key === "Escape" && search.classList.contains("is-open")) {
+                    closeSearch();
+                }
+            });
+
+            // hero search button -> header search behavior
+            if (heroSearchBtn) {
+                heroSearchBtn.addEventListener("click", function () {
+                    searchBtn.click();
+                });
+            }
+
+            // ヘッダーメニューのアコーディオン
+            document
+                .querySelectorAll(".header__menu-item")
+                .forEach(function (item) {
+                    item.addEventListener("toggle", function () {
+                        if (!item.open) return;
+                        document
+                            .querySelectorAll(".header__menu-item")
+                            .forEach(function (other) {
+                                if (other !== item) {
+                                    other.removeAttribute("open");
+                                }
+                            });
+                    });
+                });
+
+            // PC 表示のドロップダウンは、ボタン＋ドロップダウン以外をクリック・タップしたら閉じる
+            // （ハンバーガー内のアコーディオンになるモバイル表示では閉じない）
+            const headerMenuDropdownQuery = window.matchMedia(
+                "(min-width: 1000px)",
+            );
+            document.addEventListener("click", function (event) {
+                if (!headerMenuDropdownQuery.matches) return;
+                document
+                    .querySelectorAll(".header__menu-item[open]")
+                    .forEach(function (item) {
+                        if (!item.contains(event.target)) {
+                            item.removeAttribute("open");
+                        }
+                    });
+            });
+
+            // 配色・言語メニューも、ボタン＋メニュー以外をクリック・タップしたら閉じる
+            document.addEventListener("click", function (event) {
+                if (!themeNav.contains(event.target)) closeTheme();
+                if (!langNav.contains(event.target)) closeLang();
+            });
+
+            // Esc キーで開いているメニューを閉じる。
+            // フォーカスがメニューの中にあったときは、開いたボタンへフォーカスを戻す
+            document.addEventListener("keydown", function (event) {
+                if (event.key !== "Escape") return;
+                if (headerMenuDropdownQuery.matches) {
+                    document
+                        .querySelectorAll(".header__menu-item[open]")
+                        .forEach(function (item) {
+                            const hadFocus = item.contains(document.activeElement);
+                            item.removeAttribute("open");
+                            if (hadFocus) item.querySelector("summary").focus();
+                        });
+                }
+                if (themeNav.classList.contains("is-open")) {
+                    const hadFocus = themeNav.contains(document.activeElement);
+                    closeTheme();
+                    if (hadFocus) themeBtn.focus();
+                }
+                if (langNav.classList.contains("is-open")) {
+                    const hadFocus = langNav.contains(document.activeElement);
+                    closeLang();
+                    if (hadFocus) langBtn.focus();
+                }
+            });
+
+            // TOC: marker位置に挿入してh2を収集
+            const main = document.querySelector(".main");
+            const marker = main?.querySelector("[data-toc-marker]");
+            let tocRoot = null;
+
+            if (main && marker) {
+                const aside = document.createElement("aside");
+                aside.className = "aside aside-toc";
+
+                const inner = document.createElement("nav");
+                inner.className = "aside-toc__inner";
+
+                aside.appendChild(inner);
+                marker.parentNode?.insertBefore(aside, marker);
+                marker.remove();
+                tocRoot = inner;
+            }
+
+            if (tocRoot && main) {
+                const headings = Array.from(
+                    main.querySelectorAll("h1, h2"),
+                ).filter((h) => !h.closest(".feedback"));
+                if (headings.length > 0) {
+                    const title = document.createElement("h2");
+                    title.textContent = TOC_TITLE;
+                    tocRoot.appendChild(title);
+
+                    const list = document.createElement("ul");
+                    const linkMap = new Map();
+                    headings.forEach((heading) => {
+                        if (!heading.id) {
+                            const base = heading.textContent
+                                ?.trim()
+                                .toLowerCase()
+                                .replace(/\s+/g, "-")
+                                .replace(/[^a-z0-9\-]/g, "");
+                            heading.id =
+                                base ||
+                                `section-${Math.random().toString(36).slice(2, 8)}`;
+                        }
+                        const li = document.createElement("li");
+                        const a = document.createElement("a");
+                        a.href = `#${heading.id}`;
+                        const isH1 = heading.tagName === "H1";
+                        a.textContent = isH1
+                            ? "Top"
+                            : heading.textContent || "";
+                        li.appendChild(a);
+                        list.appendChild(li);
+                        linkMap.set(heading.id, a);
+                    });
+                    tocRoot.appendChild(list);
+
+                    // IntersectionObserver: 画面内のh2を検知してaria-currentを切り替える
+                    const activeIds = new Set();
+                    const setCurrent = (id) => {
+                        linkMap.forEach((link) =>
+                            link.removeAttribute("aria-current"),
+                        );
+                        const target = linkMap.get(id);
+                        if (target) {
+                            target.setAttribute("aria-current", "true");
+                        }
+                    };
+
+                    const pickTopMost = () => {
+                        const visible = headings.filter((h) =>
+                            activeIds.has(h.id),
+                        );
+                        if (visible.length === 0) return;
+                        const topMost = visible.reduce((prev, cur) => {
+                            return prev.getBoundingClientRect().top <
+                                cur.getBoundingClientRect().top
+                                ? prev
+                                : cur;
+                        });
+                        setCurrent(topMost.id);
+                    };
+
+                    const observer = new IntersectionObserver(
+                        (entries) => {
+                            entries.forEach((entry) => {
+                                if (entry.isIntersecting) {
+                                    activeIds.add(entry.target.id);
+                                } else {
+                                    activeIds.delete(entry.target.id);
+                                }
+                            });
+                            pickTopMost();
+                        },
+                        {
+                            root: null,
+                            rootMargin: "0px 0px -25% 0px",
+                            threshold: 0,
+                        },
+                    );
+
+                    headings.forEach((heading) => observer.observe(heading));
+
+                    appendTocAd(tocRoot);
+
+                    // TOCページ内スクロール
+                    tocRoot.querySelectorAll("a[href^='#']").forEach((link) => {
+                        link.addEventListener("click", (event) => {
+                            const href = link.getAttribute("href");
+                            if (!href || href === "#") return;
+                            const target = document.querySelector(href);
+                            if (!target) return;
+                            event.preventDefault();
+
+                            const header =
+                                document.querySelector(".layout-header");
+                            const headerHeight = header
+                                ? header.getBoundingClientRect().height
+                                : 0;
+                            const rem = parseFloat(
+                                getComputedStyle(document.documentElement)
+                                    .fontSize,
+                            );
+                            const offset = headerHeight + rem;
+
+                            const targetTop =
+                                window.scrollY +
+                                target.getBoundingClientRect().top -
+                                offset;
+                            window.scrollTo({
+                                top: targetTop,
+                                behavior: "smooth",
+                            });
+                        });
+                    });
+                }
+            }
+
+            // AD閉じるボタン
+            document.querySelectorAll(".ad__close-btn").forEach((btn) => {
+                btn.addEventListener("click", () => {
+                    const ad = btn.closest(".ad");
+                    if (!ad) return;
+                    ad.classList.add("is-hidden");
+                });
+            });
+        </script>
+    </body>
+</html>

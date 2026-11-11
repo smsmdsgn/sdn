@@ -1,0 +1,100 @@
+---
+import { getRelativeLocaleUrl } from "astro:i18n";
+import Layout from "./Layout.astro";
+import { getBlogPosts } from "../data/blog.js";
+import { HOME_CATEGORIES } from "../data/categories.js";
+import { DEFAULT_LOCALE } from "../i18n/ui.js";
+import { formatCardDate, useTranslations } from "../i18n/utils.js";
+
+const { title } = Astro.props;
+const lang = Astro.currentLocale ?? DEFAULT_LOCALE;
+const t = useTranslations(lang);
+
+const blogPosts = getBlogPosts(lang).map((post) => ({
+    ...post,
+    date: formatCardDate(post.createdAt, lang),
+}));
+const blogListLabel = t("home.allPosts");
+---
+
+<Layout title={title}>
+    <section class="index">
+        <h2 class="index__title">{t("home.webTech")}</h2>
+        <ul class="index__list">
+            {
+                HOME_CATEGORIES.map((item) => (
+                    <li class="index__item">
+                        <a href={getRelativeLocaleUrl(lang, item.path)}>
+                            <h3 class="index__item-title">{item.label}</h3>
+                            <p class="index__item-desc">{t(item.descKey)}</p>
+                        </a>
+                    </li>
+                ))
+            }
+        </ul>
+        <div class="index__title-wrapper">
+            <h2 class="index__title">{t("home.latestPosts")}</h2>
+            <a class="index__blog-link" href={`/${lang}/blog/`}>
+                {blogListLabel}
+            </a>
+        </div>
+        {blogPosts.length === 0 ? (
+            <p class="index__blog-empty">{t("blog.empty")}</p>
+        ) : (
+        <ul class="index__blog-list">
+            {
+                blogPosts.map((post) => (
+                    <li class="index__blog-item">
+                        <a href={post.url}>
+                            <div class="index__blog-item-main">
+                                <span class="index__blog-item-date">
+                                    {post.date}
+                                </span>
+                                <h3 class="index__item-title">{post.title}</h3>
+                                <p class="index__item-desc">{post.desc}</p>
+                            </div>
+                            <div class="index__blog-item-thumb-wrap">
+                                {post.thumbnail ? (
+                                    <img
+                                        src={post.thumbnail}
+                                        alt={post.title}
+                                        class="index__blog-item-thumbnail"
+                                        width="1200"
+                                        height="630"
+                                        loading="lazy"
+                                        decoding="async"
+                                    />
+                                ) : (
+                                    <span
+                                        class="index__blog-item-thumbnail-placeholder"
+                                        aria-hidden="true"
+                                    />
+                                )}
+                            </div>
+                        </a>
+                    </li>
+                ))
+            }
+        </ul>
+        )}
+    </section>
+    <section class="message">
+        <div class="message__inner">
+            <h2 class="message__title">{t("home.about.title")}</h2>
+            <blockquote class="message__desc">
+                {t("home.about.text")}
+            </blockquote>
+            <a
+                href={getRelativeLocaleUrl(lang, "blog")}
+                class="message__btn"
+            >
+                {t("home.about.cta")}
+            </a>
+            <img
+                src="/assets/img/banner-shima.avif"
+                alt=""
+                class="message__img"
+            />
+        </div>
+    </section>
+</Layout>

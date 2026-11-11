@@ -1,0 +1,434 @@
+---
+import Layout from "../../../../layouts/Layout.astro";
+import SectionIndex from "../../../../components/SectionIndex.astro";
+
+const title = "リファレンス";
+
+const sections = [
+	{
+		heading: "組み込みオブジェクト",
+		groups: [
+			{
+				heading: "値プロパティ",
+				items: [
+					{
+						label: "globalThis",
+						href: "/ja/js/reference/global-object/global-this/",
+					},
+				],
+			},
+			{
+				heading: "関数プロパティ",
+				items: [
+					{
+						label: "eval()",
+						href: "/ja/js/reference/global-object/eval/",
+					},
+				],
+			},
+			{
+				heading: "基本オブジェクト",
+				items: [
+					{
+						label: "Object",
+						href: "/ja/js/reference/global-object/object/",
+					},
+				],
+			},
+			{
+				heading: "エラーオブジェクト",
+				items: [
+					{
+						label: "Error",
+						href: "/ja/js/reference/global-object/error/",
+					},
+				],
+			},
+			{
+				heading: "数値と日付",
+				items: [
+					{
+						label: "Number",
+						href: "/ja/js/reference/global-object/number/",
+					},
+				],
+			},
+			{
+				heading: "テキスト処理",
+				items: [
+					{
+						label: "String",
+						href: "/ja/js/reference/global-object/string/",
+					},
+				],
+			},
+			{
+				heading: "添字付きコレクション",
+				items: [
+					{
+						label: "Array",
+						href: "/ja/js/reference/global-object/array/",
+					},
+				],
+			},
+			{
+				heading: "キー付きコレクション",
+				items: [
+					{
+						label: "Map",
+						href: "/ja/js/reference/global-object/map/",
+					},
+				],
+			},
+			{
+				heading: "構造化データ",
+				items: [
+					{
+						label: "ArrayBuffer",
+						href: "/ja/js/reference/global-object/array-buffer/",
+					},
+				],
+			},
+			{
+				heading: "メモリ管理",
+				items: [
+					{
+						label: "WeakRef",
+						href: "/ja/js/reference/global-object/weak-ref/",
+					},
+				],
+			},
+			{
+				heading: "制御の抽象化",
+				items: [
+					{
+						label: "Iterator",
+						href: "/ja/js/reference/global-object/iterator/",
+					},
+				],
+			},
+			{
+				heading: "リフレクション",
+				items: [
+					{
+						label: "Reflect",
+						href: "/ja/js/reference/global-object/reflect/",
+					},
+				],
+			},
+			{
+				heading: "国際化",
+				items: [
+					{
+						label: "Intl",
+						href: "/ja/js/reference/global-object/intl/",
+					},
+				],
+			},
+		],
+	},
+	{
+		heading: "文",
+		groups: [
+			{
+				heading: "制御フロー",
+				items: [
+					{
+						label: "return",
+						href: "/ja/js/reference/statement/return/",
+					},
+				],
+			},
+			{
+				heading: "宣言",
+				items: [
+					{
+						label: "var",
+						href: "/ja/js/reference/statement/var/",
+					},
+				],
+			},
+			{
+				heading: "関数とクラス",
+				items: [
+					{
+						label: "function",
+						href: "/ja/js/reference/statement/function/",
+					},
+				],
+			},
+			{
+				heading: "反復処理",
+				items: [
+					{
+						label: "do...while",
+						href: "/ja/js/reference/statement/do-while/",
+					},
+				],
+			},
+			{
+				heading: "その他",
+				items: [
+					{
+						label: "空文",
+						href: "/ja/js/reference/statement/empty/",
+					},
+				],
+			},
+		],
+	},
+	{
+		heading: "式と演算子",
+		groups: [
+			{
+				heading: "主な式",
+				items: [
+					{
+						label: "this",
+						href: "/ja/js/reference/operator/this/",
+					},
+				],
+			},
+			{
+				heading: "左辺式",
+				items: [
+					{
+						label: "プロパティアクセサー",
+						href: "/ja/js/reference/operator/property-accessor/",
+					},
+				],
+			},
+			{
+				heading: "インクリメントとデクリメント",
+				items: [
+					{
+						label: "インクリメント（++）",
+						href: "/ja/js/reference/operator/increment/",
+					},
+					{
+						label: "デクリメント（--）",
+						href: "/ja/js/reference/operator/decrement/",
+					},
+				],
+			},
+			{
+				heading: "単項演算子",
+				items: [
+					{
+						label: "delete",
+						href: "/ja/js/reference/operator/delete/",
+					},
+				],
+			},
+			{
+				heading: "算術演算子",
+				items: [
+					{
+						label: "冪乗演算子（**）",
+						href: "/ja/js/reference/operator/exponentiation/",
+					},
+				],
+			},
+			{
+				heading: "関係演算子",
+				items: [
+					{
+						label: "小なり演算子（<）",
+						href: "/ja/js/reference/operator/less-than/",
+					},
+				],
+			},
+			{
+				heading: "等価演算子",
+				items: [
+					{
+						label: "等価演算子（==）",
+						href: "/ja/js/reference/operator/equality/",
+					},
+				],
+			},
+			{
+				heading: "ビットシフト演算子",
+				items: [
+					{
+						label: "左シフト演算子（<<）",
+						href: "/ja/js/reference/operator/left-shift/",
+					},
+				],
+			},
+			{
+				heading: "バイナリビット演算子",
+				items: [
+					{
+						label: "ビット論理積演算子（&）",
+						href: "/ja/js/reference/operator/bitwise-and/",
+					},
+				],
+			},
+			{
+				heading: "バイナリ論理演算子",
+				items: [
+					{
+						label: "論理積演算子（&&）",
+						href: "/ja/js/reference/operator/logical-and/",
+					},
+				],
+			},
+			{
+				heading: "三項演算子",
+				items: [
+					{
+						label: "条件（三項）演算子",
+						href: "/ja/js/reference/operator/conditional-operator/",
+					},
+				],
+			},
+			{
+				heading: "代入演算子",
+				items: [
+					{
+						label: "代入演算子（=）",
+						href: "/ja/js/reference/operator/assignment/",
+					},
+				],
+			},
+			{
+				heading: "yield演算子",
+				items: [
+					{
+						label: "yield演算子",
+						href: "/ja/js/reference/operator/yield/",
+					},
+				],
+			},
+			{
+				heading: "スプレッド構文",
+				items: [
+					{
+						label: "スプレッド構文（...）",
+						href: "/ja/js/reference/operator/spread-syntax/",
+					},
+				],
+			},
+			{
+				heading: "カンマ演算子",
+				items: [
+					{
+						label: "カンマ演算子（,）",
+						href: "/ja/js/reference/operator/comma-operator/",
+					},
+				],
+			},
+		],
+	},
+	{
+		heading: "関数",
+		items: [
+			{
+				label: "アロー関数",
+				href: "/ja/js/reference/function/allow-function/",
+			},
+			{
+				label: "デフォルト引数",
+				href: "/ja/js/reference/function/default-parameter/",
+			},
+			{
+				label: "残余引数",
+				href: "/ja/js/reference/function/rest-parameter/",
+			},
+			{
+				label: "arguments",
+				href: "/ja/js/reference/function/arguments/",
+			},
+			{
+				label: "メソッド定義",
+				href: "/ja/js/reference/function/method-definition/",
+			},
+			{
+				label: "ゲッター",
+				href: "/ja/js/reference/function/get/",
+			},
+			{
+				label: "セッター",
+				href: "/ja/js/reference/function/set/",
+			},
+		],
+	},
+	{
+		heading: "クラス",
+		items: [
+			{
+				label: "コンストラクタ",
+				href: "/ja/js/reference/class/constructor/",
+			},
+			{
+				label: "継承（extends）",
+				href: "/ja/js/reference/class/extends/",
+			},
+			{
+				label: "プライベート要素",
+				href: "/ja/js/reference/class/private-element/",
+			},
+			{
+				label: "パブリック要素",
+				href: "/ja/js/reference/class/public-element/",
+			},
+			{
+				label: "静的要素",
+				href: "/ja/js/reference/class/static-element/",
+			},
+			{
+				label: "静的初期化ブロック",
+				href: "/ja/js/reference/class/static-initialization-block/",
+			},
+		],
+	},
+	{
+		heading: "正規表現",
+		items: [
+			{
+				label: "後方参照",
+				href: "/ja/js/reference/regular-expression/backreference/",
+			},
+			{
+				label: "キャプチャグループ",
+				href: "/ja/js/reference/regular-expression/capturing-group/",
+			},
+		],
+	},
+];
+---
+
+<Layout title={title}>
+	<SectionIndex title={title}>
+		{
+			sections.map((section) => (
+				<section>
+					<h2>{section.heading}</h2>
+					{section.groups ? (
+						section.groups.map((group) => (
+							<>
+								<h3>{group.heading}</h3>
+								<ul>
+									{group.items.map((item) => (
+										<li>
+											<a href={item.href}>{item.label}</a>
+										</li>
+									))}
+								</ul>
+							</>
+						))
+					) : (
+						<ul>
+							{section.items?.map((item) => (
+								<li>
+									<a href={item.href}>{item.label}</a>
+								</li>
+							))}
+						</ul>
+					)}
+				</section>
+			))
+		}
+	</SectionIndex>
+</Layout>

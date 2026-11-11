@@ -1,0 +1,113 @@
+---
+layout: ../../../../../layouts/Layout.astro
+title: JavaScript入門
+short-title: JavaScript入門
+source:
+  url: https://developer.mozilla.org/ja/docs/Web/JavaScript/Guide/Introduction
+  title: "入門編"
+createdAt: 2026-09-04
+updatedAt: 2026-09-04
+---
+
+<section className="main__header">
+# JavaScript入門
+
+本章では、JavaScriptについて紹介し、その基本的な概念について説明します。
+</section>
+
+<div data-toc-marker />
+
+<section className="main__body">
+## JavaScriptとは何か
+
+JavaScriptは、クロスプラットフォームで動作するオブジェクト指向のプログラミング言語で、ウェブページをインタラクティブにするために使用されます（例えば、複雑なアニメーション、押下可能なボタン、ポップアップメニューなどを設けることです）。Node.jsのような、より高度なサーバー側のバージョンのJavaScriptもあり、ファイルをダウンロードするだけでなく（複数のコンピューター間でのリアルタイムの連携など）、ウェブサイトに多くの機能を追加することができます。ホスト環境（例えばウェブブラウザー）内では、JavaScriptとその環境のオブジェクトが結びつけられ、プログラム制御が可能になっています。
+
+JavaScriptには、`Array`、`Map`、`Math`といったオブジェクトからなる基本的なライブラリ、そして演算子、制御構文、文といったプログラミング言語の要素からなる主要な機能が含まれています。
+
+JavaScriptのコア機能は、追加のオブジェクトを補うことで、様々な目的に拡張することができます。例えば、以下のようなものです。
+
+- クライアントサイドJavaScriptは、ブラウザーとそのドキュメントオブジェクトモデル（DOM）を制御するオブジェクトを提供することにより、コア言語を拡張します。例えば、クライアントサイドでの拡張により、アプリケーションがHTMLフォーム上に要素を配置したり、マウスクリック、フォーム入力、ページ移動といったユーザーのイベントに応答できたりします。
+- サーバーサイドJavaScriptは、JavaScriptを使ったサーバーの稼働に関連するオブジェクトを提供することにより、コア言語を拡張します。例えば、サーバーサイドでの拡張により、アプリケーションがデータベースとやり取りしたり、アプリケーション内のある呼び出しから別の呼び出しまでの間を情報が関連性を保ったり、サーバー上のファイルを操作したりできます。
+
+これはつまり、ブラウザー内でJavaScriptがウェブページ（DOM）の見た目を変更できるということです。同様に、サーバー上のNode.jsのJavaScriptは、ブラウザー内に記述されたコードからの独自のリクエストに応答できます。
+
+## JavaScriptとJava
+JavaScriptとJavaはいくつかの点では似ていますが、その他の点ではまったくの別ものです。JavaScript言語はJavaと共通点がありますが、Javaのような静的型付けと強い型検査を持っていません。LiveScriptからJavaScriptへ改名する理由ともなった、Javaが持つ多くの式構文、命令規則と基本的な制御フローをJavaScriptは踏襲しています。
+
+宣言によって作られたクラスから構成されるJavaのコンパイル時システムとは対照的に、JavaScriptは、数値や論理値、文字列を表す少数のデータ型をベースにしたランタイムシステムに対応しています。JavaScriptは、より一般的であるクラスベースのオブジェクトモデルの代わりに、プロトタイプベースのオブジェクトモデルを持っています。プロトタイプベースモデルは動的な継承を実現します。つまり、様々なオブジェクトから継承できるということです。またJavaScriptは、特殊な宣言型を必要としない関数に対応しています。関数はオブジェクトのプロパティに設定することができ、弱い型付けのメソッドとして実行することができます。
+
+JavaScriptはJavaに比べてとても自由な形式を持つ言語です。変数、クラス、メソッドをあまねく宣言する必要はありません。メソッドがpublicかprivateか、あるいはprotectedかどうかを気にかけることも、インターフェイスを実装する必要もありません。変数、引数、そして型を返す関数は厳密には型付けされていません。
+
+Javaは高速実行と型安全のために設計されたクラスベースのプログラミング言語です。型安全というのは、例えば、Javaの整数値をオブジェクトの参照に型変換したり、有害なJavaのバイトコードがプライベートなメモリにアクセスしたりすることができないということです。Javaのクラス継承と強い型付けは、一般的には密結合されたオブジェクト階層を必要とします。こうした前提条件によってJavaのプログラミングはJavaScriptのプログラミングに比べて複雑なものとなります。
+
+それに対して、JavaScriptはHyperTalkやdBaseといった一連の小規模で動的型付けを持つ言語の精神を引き継いでいます。これらのスクリプト言語は、より簡素な構文、専門化された組み込み関数、最小限の要件でオブジェクトを生成できることなどで、より多くの人々にプログラミングツールを提供しています。
+
+|JavaScript|Java|
+|:---|:---|
+|オブジェクト指向。オブジェクトのデータ型に区別はない。継承はプロトタイプベースの機構を通して行われ、プロパティとメソッドはどんなオブジェクトにも動的に追加できる。|クラスベース。オブジェクトはクラスとそのクラス階層によって継承されたインスタンスとに分かれている。クラスとインスタンスは動的にプロパティやメソッドを追加することができない。|
+|変数のデータ型は宣言が不要（動的型付け、弱い型付け）。|変数のデータ型は宣言が必須（静的型付け、強い型付け）。|
+|ハードディスクには自動的に書き込みできない。|	ハードディスクには自動的に書き込みできる。|
+
+## JavaScriptとECMAScript仕様書
+JavaScriptは、ヨーロッパの情報通信システム標準化団体である<a href="https://ecma-international.org/" target="_blank" rel="noopener noreferrer" className="external-link">Ecma International</a>（ECMAは、以前はEuropean Computer Manufacturers Associationの頭文字）で標準化されており、JavaScriptをベースとした国際的なプログラミング言語の標準化を実現しています。この標準化されたJavaScriptはECMAScriptと呼ばれ、この規格に対応するすべてのアプリケーションで同じように動作します。企業は、このオープンスタンダードな言語を使って、JavaScriptの実装を開発することができます。ECMAScript標準は、ECMA-262仕様書に記載されています。
+
+ECMA-262標準は、<a href="https://www.iso.org/home.html" target="_blank" rel="noopener noreferrer" className="external-link">ISO</a>（International Organization for Standardization、国際標準化機構）によりISO-16262としても承認されています。また仕様書は、<a href="https://ecma-international.org/publications-and-standards/standards/ecma-262/" target="_blank" rel="noopener noreferrer" className="external-link">Ecma Internationalのウェブサイト</a>でも確認できます。ECMAScript仕様書には、<a href="https://www.w3.org/" target="_blank" rel="noopener noreferrer" className="external-link">World Wide Web Consortium（W3C）</a>によって標準化されているドキュメントオブジェクトオブジェクトモデル（DOM）は記載されていません。DOMはスクリプトから利用できるHTML文書のオブジェクトを定義しています。
+
+### JavaScriptドキュメント vs ECMAScript仕様書
+ECMAScript仕様書はECMAScriptを実装するために必要な一連の要件です。ECMAScriptの実装やエンジン（FirefoxのSpiderMonkeyやChromeのV8など）で、標準に準拠した言語機能を使用したい場合に有益なものです。
+
+ECMAScriptのドキュメントは、スクリプトのプログラマーを支援するためのものではありません。スクリプトを記述する際にはJavaScriptのドキュメントを使いましょう。
+
+ECMAScript仕様書は、JavaScriptプログラマーにあまり馴染みのない専門用語と文法で書かれています。この言語を解説したものとECMAScriptとは異なるところがあるかもしれませんが、この言語自体は同じものです。JavaScriptは、ECMAScript仕様書で描かれた機能すべてに対応しています。
+
+JavaScriptのドキュメントは、JavaScriptプログラマーに適した形で言語の特徴について記述しています。
+
+## JavaScriptを始めよう
+JavaScriptを始めるのに必要なものは、最新のウェブブラウザーだけです。<a href="https://www.firefox.com/ja/" target="_blank" rel="noopener noreferrer" className="external-link">Firefox</a>、<a href="https://www.google.com/chrome/index.html" target="_blank" rel="noopener noreferrer" className="external-link">Chrome</a>、<a href="https://explore.microsoft.com/ja-jp/edge" target="_blank" rel="noopener noreferrer" className="external-link">Microsoft Edge</a>、<a href="https://www.apple.com/jp/safari/" target="_blank" rel="noopener noreferrer" className="external-link">Safari</a>の最新バージョンは、このガイドで説明されているすべての機能に対応しています。
+
+JavaScriptを試すのに非常に便利なツールがJavaScriptコンソール（ウェブコンソール、または単にコンソールと呼ばれることもあります）です。これは、JavaScriptを入力すると、現在のページで実行できるツールです。
+
+ここに表示されているスクリーンショットはFirefoxのウェブコンソールを示してはいますが、現代のブラウザーにはすべて、これと似た方法で動作するコンソールが搭載されています。
+
+### ウェブコンソールを開く
+コンソールを開くための正確な手順は、ブラウザーによって異なります。
+- <a href="https://firefox-source-docs.mozilla.org/devtools-user/web_console/#opening-the-web-console" target="_blank" rel="noopener noreferrer" className="external-link">Firefoxでコンソールを開く</a>
+- <a href="https://developer.chrome.com/docs/devtools/open?hl=ja" target="_blank" rel="noopener noreferrer" className="external-link">Chromeでコンソールを開く</a>
+- <a href="https://learn.microsoft.com/ja-jp/microsoft-edge/devtools/console/" target="_blank" rel="noopener noreferrer" className="external-link">Microsoft Edgeでコンソールを開く</a>
+- <a href="https://support.apple.com/ja-jp/guide/safari/sfri20948/mac" target="_blank" rel="noopener noreferrer" className="external-link">Safariでコンソールを開く</a>
+### JavaScriptを入力して実行
+コンソールはブラウザーウィンドウの下に表示されます。コンソールの下部に沿って、JavaScriptを入力するための入力業があり、出力は上のパネルに表示されます。
+![コンソール](/assets/img/pages/js/tutorial/beginner/introduction/img-introduction-01.avif)
+コンソールは`eval`と全く同じように動作します。最後に入力された式が返されます。分かりやすくするために、コンソールに何か入力されるたびに、実際には`eval`の周りを`console.log()`で囲むと想像してみると、このようになります。
+```js
+console.log(eval("3 + 5"));
+```
+### コンソールでの複数行入力
+既定では、コードを入力した後でEnterキー（または、キーボードによってはReturnキー）を押すと、入力した文字が実行されます。複数行の入力を行うには、次のようにします。
+- 入力した文字列が不完全であった場合（たとえば、`function foo() {`と入力した場合）、コンソールはEnterを改行とみなし、別の行を入力できるようになります。
+- Shiftキーを押しながらEnterキーを押すと、コンソールはこれを改行として扱い、別の行を入力できるようになります。
+- Firefoxだけですが、<a href="https://firefox-source-docs.mozilla.org/devtools-user/web_console/the_command_line_interpreter/index.html#multi-line-mode" target="_blank" rel="noopener noreferrer" className="external-link">複数行の入力モード</a>を有効にすると、ミニエディターに複数の行を入力し、準備が出来たらすべてを実行することができます。
+JavaScriptを書き始めるには、コンソールを開き、次のコードをコピーしてプロンプトに貼り付けます。
+```js
+(function () {
+  "use strict";
+  /* コードの開始 */
+  function greetMe(yourName) {
+    alert(`Hello ${yourName}`);
+  }
+
+  greetMe("World");
+  /* コードの終了 */
+})();
+```
+展開をブラウザーで見るには、Enterキーを押してください。
+### 次に来るもの
+このガイドでは、より複雑なアプリケーションを作成できるように、JavaScriptの構文と言語の特徴を紹介します。
+ですが、しばらくの間、常にあなたのコードの先頭に`(function(){"use strict";`を、コードの最後に`})();`を記述することを忘れないでください。[厳格モード](#)と[IIFE](#)の記事でこれが何であるかを説明していますが、今のところは次のように捉えておいてください。
+1. 初心者をつまずかせる、JavaScriptのセマンティクスを避ける。
+2. コンソールで実行されたコードスニペットが相互に影響することを防止する（例えば、あるコンソールの実行で作成されたものが別のコンソールの実行に使用されるなど）。
+
+</section>
+
+:::feedback
+:::

@@ -1,0 +1,25 @@
+---
+import { DEFAULT_LOCALE, SOURCE_LICENSE } from "../i18n/ui.js";
+import { useTranslations } from "../i18n/utils.js";
+
+export type Source = { url: string; title: string };
+
+const { url, title } = Astro.props as Source;
+const t = useTranslations(Astro.currentLocale ?? DEFAULT_LOCALE);
+---
+
+<div class="card card--note source-notice">
+	<p>
+		{t("source.before")}<a
+			href={url}
+			class="external-link"
+			target="_blank"
+			rel="noopener noreferrer">{title}</a
+		>{t("source.middle")}<a
+			href={SOURCE_LICENSE.url}
+			class="external-link"
+			target="_blank"
+			rel="noopener noreferrer">{SOURCE_LICENSE.name}</a
+		>{t("source.after")}
+	</p>
+</div>

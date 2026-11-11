@@ -1,0 +1,183 @@
+---
+import { buildMenu } from "../data/menu.js";
+import { pageExists } from "../data/pages.js";
+import { DEFAULT_LOCALE } from "../i18n/ui.js";
+import { useTranslations } from "../i18n/utils.js";
+
+// 多言語ラベルの型定義
+type Label = string | Record<string, string>;
+// サイドメニュー項目の型定義（ネスト可）
+type MenuItem = {
+	label: Label;
+	href?: string;
+	children?: MenuItem[];
+	isAccordion?: boolean;
+	linkLabel?: Label;
+	isLabel?: boolean;
+};
+type MenuItemView = {
+	text: string;
+	linkText: string;
+	href?: string;
+	children?: MenuItemView[];
+	isAccordion?: boolean;
+	isLabel?: boolean;
+};
+
+const { items, isRoot = false } = Astro.props as {
+	items?: MenuItemView[];
+	isRoot?: boolean;
+};
+const isListOnly = Array.isArray(items);
+
+// 現在のロケール（未設定時はen-us）
+const locale = Astro.currentLocale ?? DEFAULT_LOCALE;
+const t = useTranslations(locale);
+// ラベルの表示文字列をロケールに合わせて解決
+const getLabel = (label: Label) =>
+	typeof label === "string" ? label : label[locale] || label["en-us"];
+// 親リンク用の表示文字列を生成（必要に応じて上書き可能）
+const getLinkLabel = (item: MenuItem) => {
+	if (item.linkLabel) return getLabel(item.linkLabel);
+	const base = getLabel(item.label);
+	if (!item.isAccordion) return base;
+	return t("menu.about", { label: base });
+};
+// パスの末尾スラッシュを正規化
+const normalizePath = (path: string) =>
+	path.endsWith("/") ? path : `${path}/`;
+// 現在ページのパスを取得
+const currentPath = normalizePath(Astro.url.pathname);
+
+// メニュー定義
+const MENU: MenuItem[] = buildMenu(locale);
+
+// 現在のURLが属する最上位カテゴリを特定
+const findActiveTop = (): MenuItem | undefined =>
+	MENU.find(
+		(item) =>
+			!!item.href && currentPath.startsWith(normalizePath(item.href)),
+	);
+
+// 表示するメニューをURLに応じて切り替える
+let visibleMenu: MenuItem[] = MENU;
+const activeTop = findActiveTop();
+const isLocaleRoot = currentPath === `/${locale}/`;
+if (isLocaleRoot) {
+	// /ja/ /en-us/ /zh-cn/ のときは最上位だけを表示
+	visibleMenu = MENU.map((item) => ({
+		...item,
+		children: undefined,
+		isAccordion: false,
+	}));
+} else if (activeTop) {
+	const isTopPage =
+		!!activeTop.href && currentPath === normalizePath(activeTop.href);
+	// カテゴリ最上位でも配下でも、該当カテゴリだけを表示
+	visibleMenu = [activeTop];
+	// 最上位ページでも折りたたまない前提にしたい場合はここで調整
+	if (isTopPage && activeTop.isAccordion) {
+		activeTop.isAccordion = false;
+	}
+}
+
+// ページが実在しないリンク（未作成・その言語に未翻訳）を外す。
+// 子があれば見出しとして残して親リンクだけ外し、子も無ければ項目ごと出さない。
+// 見出し（isLabel）と、もともとリンクの無い項目はそのまま
+const removeMissingPages = (items: MenuItem[]): MenuItem[] =>
+	items.flatMap((item) => {
+		const children = item.children
+			? removeMissingPages(item.children)
+			: undefined;
+		if (item.isLabel || !item.href || pageExists(item.href)) {
+			return [{ ...item, children }];
+		}
+		return children?.length ? [{ ...item, href: undefined, children }] : [];
+	});
+visibleMenu = removeMissingPages(visibleMenu);
+
+// 表示用に多言語ラベルを解決
+const toView = (items: MenuItem[]): MenuItemView[] =>
+	items.map((item) => ({
+		text: getLabel(item.label),
+		linkText: getLinkLabel(item),
+		href: item.href,
+		isAccordion: item.isAccordion,
+		isLabel: item.isLabel,
+		children: item.children ? toView(item.children) : undefined,
+	}));
+const visibleMenuView = toView(visibleMenu);
+---
+
+{
+	isListOnly ? (
+		<ul class={isRoot ? "aside-menu__list" : "aside-menu__sublist"}>
+			{items.map((item) => (
+				<li class="aside-menu__item">
+					{item.children && item.isAccordion ? (
+						<details class="aside-menu__details">
+							<summary class="aside-menu__summary">
+								{item.text}
+							</summary>
+							<div class="aside-menu__summary-body">
+								{item.href ? (
+									item.isLabel ? (
+										<span class="aside-menu__label">
+											{item.linkText}
+										</span>
+									) : (
+										<a
+											class="aside-menu__link"
+											href={item.href}
+										>
+											{item.linkText}
+										</a>
+									)
+								) : null}
+								<Astro.self items={item.children} />
+							</div>
+						</details>
+					) : (
+						<>
+							{item.isLabel ? (
+								<span class="aside-menu__label">
+									{item.text}
+								</span>
+							) : (
+								<a
+									class="aside-menu__link"
+									href={item.href || "#"}
+								>
+									{item.text}
+								</a>
+							)}
+							{item.children?.length ? (
+								<Astro.self items={item.children} />
+							) : null}
+						</>
+					)}
+				</li>
+			))}
+		</ul>
+	) : (
+		<aside class="aside aside-menu">
+			<button type="button" class="aside-menu__close-btn">
+				<span class="sr-only">Menu Close</span>
+			</button>
+			<div class="aside-menu__filter">
+				<label for="input-filter">
+					<span class="sr-only">{t("aside.filter")}</span>
+				</label>
+				<input
+					id="input-filter"
+					type="text"
+					name="filter"
+					placeholder={t("aside.filter")}
+				/>
+			</div>
+			<nav>
+				<Astro.self items={visibleMenuView} isRoot={true} />
+			</nav>
+		</aside>
+	)
+}

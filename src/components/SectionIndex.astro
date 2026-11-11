@@ -1,0 +1,11 @@
+---
+import SourceNotice, { type Source } from "./SourceNotice.astro";
+
+const { title, source } = Astro.props as { title: string; source?: Source };
+---
+
+<article class="article article--section-index">
+	{source ? <SourceNotice {...source} /> : null}
+	<h1>{title}</h1>
+	<slot />
+</article>

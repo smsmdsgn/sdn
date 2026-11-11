@@ -1,0 +1,42 @@
+---
+import Layout from "../../../layouts/Layout.astro";
+import SectionIndex from "../../../components/SectionIndex.astro";
+
+const title = "HTML：ハイパーテキストマークアップ言語";
+---
+
+<Layout title={title}>
+  <SectionIndex
+    title={title}
+    source={{
+      url: "https://developer.mozilla.org/ja/docs/Web/HTML",
+      title: "HTML: ハイパーテキストマークアップ言語",
+    }}
+  >
+    <p>
+      HTML（HyperText Markup
+      Language）はウェブのもっとも基本的な構成要素です。HTMLはWebページの基本レイアウトに従ってWebページのコンテンツを記述し定義するものです。HTMLに隣接する他の技術としては、Webページの表示や表現を記述するもの（CSS）または機能や振る舞いを記述するもの（JavaScript）があります。
+    </p>
+    <p>
+      「ハイパーテキスト」はWebページから別なページに、ウェブサイト内でもウェブサイト間でも、接続するリンクを示します。リンクはウェブの基礎的な特徴です。コンテンツをインターネットにアップロードして他の人々が作成したページにリンクすれば、World
+      Wide Webの活発な参加者になれます。
+    </p>
+    <p>
+      HTMLではウェブブラウザーのテキスト、画像、その他のコンテンツを記述するために「マークアップ」を使用します。HTMLのマークアップには、head,
+      title, body, header, footer, article, section, p, div, span, img, aside,
+      audio, canvas, datalist, details, embed, nav, search, output, progress,
+      video, ul, ol, liその他たくさんの特殊な「要素」を使います。
+    </p>
+    <p>
+      HTML要素は文書中で<code>&lt;</code>および<code>&gt;</code
+      >で囲まれた要素名で構成される「タグ」によって区別されます。タグ内の要素名は、大文字と小文字の区別がありません。つまり、大文字でも、小文字でも、混在して書いても構いません。たとえば、<code
+        >&lt;title&gt;</code
+      >タグは<code>&lt;Title&gt;</code>や<code>&lt;TITLE&gt;</code
+      >やその他の方法で書くことができます。ただし、タグを小文字で書くのが習慣となっており、推奨されています。
+    </p>
+    <ul>
+      <li><a href="/ja/html/guide/">ガイド</a></li>
+      <li><a href="/ja/html/reference/">リファレンス</a></li>
+    </ul>
+  </SectionIndex>
+</Layout>

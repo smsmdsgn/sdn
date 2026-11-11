@@ -1,0 +1,31 @@
+---
+import Layout from "../../../layouts/Layout.astro";
+import SectionIndex from "../../../components/SectionIndex.astro";
+
+const title = "JavaScript";
+---
+
+<Layout title={title}>
+	<SectionIndex title={title}>
+		<p>
+			JavaScript（JS）は軽量でインタプリタ型（あるいは実行時コンパイルされる）第一級関数を備えたプログラミング言語です。Webページでよく使用されるスクリプト言語として知られ、多くのブラウザ以外の環境、例えばNode.jsやApache
+			CouchDB、Adobe
+			Acrobatなどでも使用されています。JavaScriptはプロトタイプベースで、ガーベジコレクションのある、動的な言語であり、命令型、関数型、オブジェクト指向など、複数のパラダイムに対応しています。
+		</p>
+		<p>
+			JavaScriptの動的な機能には、ランタイムオブジェクトの構築、可変引数リスト、関数変数、動的スクリプトの作成（evalで）、オブジェクトの内包（for...inとObjectユーティリティで）、ソースコードの復元（JavaScript関数はそのソーステキストを格納しtoString()で復元可能）が含まれます。
+		</p>
+		<p>
+			JavaScriptの規格書はECMAScript Language SpecificationおよびECMAScript
+			Internationalization API
+			specification（ECMA-402）です。私たちは、あるブラウザが機能を実装するとすぐに、それを文書化するように努めています。このことは、ECMAScriptの新しい機能に関する幾つかの提案がすでにブラウザに実装されている場合、SDNの記事の文書や例ではそれらの新しい機能のいくつかを使用する可能性があることを示しています。ほとんどの場合、これはステージ3と4の間で起こることで、通常は仕様が正式に公開される前です。
+		</p>
+		<p>
+			JavaScriptをプログラミング言語Javaと混同しないでください。JavaScriptは「インタプリタ版のJava」ではありません。”Java”と”JavaScript”は両方ともアメリカやその他の国においてオラクルの商標または登録商標です。しかし、この2つのプログラミング言語は構文、セマンティック、利用形態が大きく異なります。
+		</p>
+		<ul>
+			<li><a href="/ja/js/reference/">リファレンス</a></li>
+			<li><a href="/ja/js/tutorial/">チュートリアル</a></li>
+		</ul>
+	</SectionIndex>
+</Layout>

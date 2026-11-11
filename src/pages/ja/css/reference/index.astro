@@ -1,0 +1,52 @@
+---
+import Layout from "../../../../layouts/Layout.astro";
+import SectionIndex from "../../../../components/SectionIndex.astro";
+
+const title = "リファレンス";
+
+const groups = [
+	{
+		heading: "プロパティ",
+		items: [
+			{ label: "grid-area", href: "/ja/css/reference/property/grid-area/" },
+			{
+				label: "overscroll-behavior",
+				href: "/ja/css/reference/property/overscroll-behavior/",
+			},
+			{
+				label: "text-autospace",
+				href: "/ja/css/reference/property/text-autospace/",
+			},
+		],
+	},
+	{
+		heading: "セレクタ",
+		items: [
+			{
+				label: "属性セレクタ",
+				href: "/ja/css/reference/selector/attribute-selector/",
+			},
+		],
+	},
+];
+---
+
+<Layout title={title}>
+	<SectionIndex title={title}>
+		<h2>索引</h2>
+		{
+			groups.map((group) => (
+				<>
+					<h3>{group.heading}</h3>
+					<ul>
+						{group.items.map((item) => (
+							<li>
+								<a href={item.href}>{item.label}</a>
+							</li>
+						))}
+					</ul>
+				</>
+			))
+		}
+	</SectionIndex>
+</Layout>

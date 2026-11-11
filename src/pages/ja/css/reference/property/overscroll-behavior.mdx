@@ -1,0 +1,147 @@
+---
+layout: ../../../../../layouts/Layout.astro
+title: overscroll-behaviorプロパティ
+short-title: overscroll-behavior
+source:
+  url: https://developer.mozilla.org/ja/docs/Web/CSS/Reference/Properties/overscroll-behavior
+  title: overscroll-behavior
+createdAt: 2026-04-27
+updatedAt: 2026-04-27
+---
+
+<section className="main__header">
+# overscroll-behaviorプロパティ
+
+<details className="baseline-info baseline-info--limited">
+  <summary className="baseline-info__head">
+    <span className="baseline-info__status-icon" role="img"></span>
+    <p className="baseline-info__status-title">利用可能性は限定的</p>
+    <ul className="baseline-info__engine-list">
+      <li className="baseline-info__engine-item">
+        <span className="baseline-info__engine-icon" data-browser="chrome" data-supported="full"></span>
+        <span className="baseline-info__engine-icon" data-browser="edge" data-supported="full"></span>
+      </li>
+      <li className="baseline-info__engine-item">
+        <span className="baseline-info__engine-icon" data-browser="firefox" data-supported="full"></span>
+      </li>
+      <li className="baseline-info__engine-item">
+        <span className="baseline-info__engine-icon" data-browser="safari" data-supported="none"></span>
+      </li>
+    </ul>
+    <span className="baseline-info__toggle-icon"></span>
+  </summary>
+  <div className="baseline-info__body">
+    <p className="baseline-info__desc">この機能はベースラインではありません。最も広く使用されているブラウザーの一部で動作しません。</p>
+    <p className="baseline-info__signal">この機能をより多くのブラウザーで使えるようにしてほしいですか？<a href="https://github.com/web-platform-dx/developer-signals/issues/567" className="external-link">理由を教えてください。</a></p>
+    <ul className="baseline-info__link-list">
+      <li className="baseline-info__link-item">
+        <a href="#">もっと詳しく</a>
+      </li>
+      <li className="baseline-info__link-item">
+        <a href="#" className="external-link">完全な互換性情報を見る（caniuseに移動）</a>
+      </li>
+      <li className="baseline-info__link-item">
+        <a href="#">Report feedback</a>
+      </li>
+    </ul>
+  </div>
+</details>
+
+`overscroll-behavior`は[CSS](#)のプロパティで、スクロール領域の境界に達したときのブラウザの挙動を設定します。
+</section>
+
+<div data-toc-marker />
+
+<section className="main__body">
+## 構成要素のプロパティ
+このプロパティは、以下のCSSプロパティの一括指定です。
+- [`overscroll-behavior-x`](#)
+- [`overscroll-behavior-y`](#)
+
+## 構文
+```css
+/* キーワード値 */
+overscroll-behavior: auto; /* 規定 */
+overscroll-behavior: contain;
+overscroll-behavior: none;
+
+/* 2つの値 */
+overscroll-behavior: auto contain;
+
+/* グローバル値 */
+overscroll-behavior: inherit;
+overscroll-behavior: initial;
+overscroll-behavior: revert;
+overscroll-behavior: revert-layer;
+overscroll-behavior: unset;
+```
+
+`overscroll-behavior`プロパティは、次の値の一覧のうち1つまたは2つのキーワードで指定します。
+
+2つのキーワードでは、`overscroll-behavior`のそれぞれ`x`および`y`軸の値を指定します。値が1つだけ指定された場合は、xおよびyが同じ値とみなされます。
+
+### 値
+
+<dl className="definition-list">
+  <dt>`auto`</dt>
+  <dd>規定のスクロールオーバーフロー動作が、通常どおり発生します。</dd>
+  <dt>`contain`</dt>
+  <dd>この値が設定された要素内では、規定のスクロールオーバーフロー動作（「跳ね返り」効果など）が見られます。ただし、隣接するスクロール領域でのスクロール連鎖は発生せず、背後に配置された要素はスクロールしません。`contain`の値では、垂直方向の引いて更新のジェスチャーや、水平方向のスワイプ操作を含む、ブラウザーのネイティブナビゲーションが無効になります。</dd>
+  <dt>`none`</dt>
+  <dd>隣接するスクロール領域へのスクロール連鎖は発生せず、規定のスクロールオーバーフロー動作が抑止されます。</dd>
+</dl>
+
+## 解説
+
+規定では、モバイルブラウザーはページの上端または下端（または他のスクロール領域）に到達したときに「跳ね返り」効果や、ページの更新を行う傾向があります。また、スクロールするコンテンツのあるページの上に、やはりスクロールするコンテンツのあるダイアログボックスがある場合、ダイアログボックスの[スクロール境界](#)に達すると、その下にあるページがスクロールを開始することにお気づきかもしれません。これは[スクロール連鎖](#)と呼ばれます。
+
+場合によっては、この動きが望ましくないことがあります。`overscroll-behavior`を使用すると、望ましくないスクロール連鎖を抑止したり、ブラウザー版のFacebookやTwitterアプリなどに見られる「引いて更新」の類の動きを実現したりすることができます。
+
+このプロパティは[スクロールコンテナー](#)にのみ適用されることに注意してください。特に、[`<iframe>`](#)はスクロールコンテナーではないため、iframeにこのプロパティを設定しても効果はありません。iframeからのスクロール連鎖を制御するには、`overscroll-behavior`をiframe内の文書の[`<html>`](#)要素と[`<body>`](#)要素の両方に設定してください。
+
+スクロール可能なオーバーフローを持たない[スクロールコンテナー](#)、例えば`overflow: hidden`が設定された要素などは、常に[スクロール境界](#)にあるとみなされます。そのため、`overscroll-behavior`を`contain`や`none`などのデフォルト意外に設定すると、親要素のスクロールコンテナーへのスクロール連鎖が防止されます。これは、ダイアログやオーバーレイが開いている間、背景のスクロールを防ぐために使用することができます。
+
+## 例
+
+### 下の要素がスクロールするのを抑止する
+
+下記の例は、全画面で擬似連絡先の一覧を、チャットウィンドウのついたダイアログボックスで表示します。
+
+<p class="codepen" data-height="900" data-pen-title="overscroll-behavior-01" data-version="2" data-default-tab="result" data-slug-hash="WbowmNr" data-user="smsmdsgn" style="height: 900; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 2px solid; margin: 1em 0; padding: 1em;">
+  <span>See the Pen <a href="https://codepen.io/editor/smsmdsgn/pen/019e13b1-c4b7-7179-b4de-62bae3df45ce">
+  overscroll-behavior-01</a> by SHIMASHIMA DESIGN (<a href="https://codepen.io/smsmdsgn">@smsmdsgn</a>)
+  on <a href="https://codepen.io">CodePen</a>.</span>
+</p>
+<script async src="https://public.codepenassets.com/embed/index.js"></script>
+
+どちらの領域もスクロールします。普通、チャットウィンドウをスクロール境界に当たるまでスクロールすると、下の連絡先ウィンドウもスクロールを始めます。これは望ましくないことです。これは、次のようにチャットウィンドウに`overscroll-behavior-y`（`overscroll-behavior`でも可）を使用することで抑止することができます。
+
+```css
+.messages {
+  height: 220px;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+```
+
+連絡先が先頭または末端までスクロールしたときの標準のスクロール末端効果を抑止したいかもしれません（例えばAndroid版Chromeは、先頭の境界を超えてスクロールしようとするとページを再読み込みします）。これは`overscroll-behavior: none`を[`<html>`](#)要素に設定することで抑止することができます。
+
+```css
+html {
+  margin: 0;
+  overscroll-behavior: none;
+}
+```
+
+下記は横スクロールの例です。
+
+<p class="codepen" data-height="500" data-pen-title="overscroll-behavior-02" data-version="2" data-default-tab="result" data-slug-hash="OPbNqWV" data-user="smsmdsgn" style="height: 500; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 2px solid; margin: 1em 0; padding: 1em;">
+  <span>See the Pen <a href="https://codepen.io/editor/smsmdsgn/pen/019e13d4-63e8-7c83-9099-e0e9e26cef1f">
+  overscroll-behavior-02</a> by SHIMASHIMA DESIGN (<a href="https://codepen.io/smsmdsgn">@smsmdsgn</a>)
+  on <a href="https://codepen.io">CodePen</a>.</span>
+</p>
+<script async src="https://public.codepenassets.com/embed/index.js"></script>
+</section>
+
+:::feedback
+:::

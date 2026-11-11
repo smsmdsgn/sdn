@@ -1,0 +1,244 @@
+---
+layout: ../../../../../layouts/Layout.astro
+title: CSSを使ったHTMLの要素への色の適用
+short-title: 色の適用（Applying Color）
+source:
+  url: https://developer.mozilla.org/ja/docs/Web/CSS/Guides/Colors/Applying_color
+  title: "CSS を使った HTML の要素への色の適用"
+createdAt: 2026-02-10
+updatedAt: 2026-02-11
+---
+
+<section className="main__header">
+# CSSを使ったHTMLの要素への色の適用
+
+[CSS](#)では、[HTML](#)[要素](#)に色を追加し好みの見た目にする方法が多岐に渡ります。このガイドは、CSSを使用してHTML要素に色を適用する方法を紹介する入門書です。
+
+:::note
+[色を賢く使用する](#)ことが重要です。常に適切な色を選択し、テキストと背景のコントラストを十分に確保して読みやすさを保証し、視覚能力が異なる人々のニーズを常に念頭に置いてください。
+:::
+</section>
+
+<div data-toc-marker />
+
+<section className="main__body">
+## 色を設定できるプロパティ
+
+要素レベルでは、HTMLのすべてのものに色を適用することができます。それよりも、テキストや境界線など、要素の中に描かれているものの種類で見てみましょう。それぞれについて、色を適用するCSSプロパティの一覧を見てみましょう。
+
+基礎的なレベルでならば、[`color`](#)プロパティはHTML要素のコンテンツの色を定義し、[`background-color`](#)はHTML要素の背景色を定義すると言えます。これらのプロパティはほぼすべての要素で使用できます。
+
+### テキスト
+
+要素がレンダリングされるたびに、テキスト、その背景、およびテキストの装飾の色を決定するために以下のプロパティが使用されます。
+
+<dl className="definition-list">
+    <dt>[`color`](#)</dt>
+    <dd>
+    テキストと[テキスト装飾](#)（下線や上線、打ち消し線などを付加するもの）に使用する色です。
+    </dd>
+    <dt>[`background-color`](#)</dt>
+    <dd>
+    テキストの背景色です。
+    </dd>
+    <dt>[`text-shadow`](#)</dt>
+    <dd>
+    テキストに適用する影の効果を設定します。影の設定には、影のベース色（他のパラメータに基づいて背景をぼかして混色する色）があります。より詳しくはテキストの[ドロップシャドウ](#)を参照してください。
+    </dd>
+    <dt>[`text-decoration-color`](#)</dt>
+    <dd>
+    テキスト装飾（下線、取り消し線など）の既定の色は[`currentColor`](#)です。このキーワードは、`color`プロパティの現在の値を表します。ただし、`text-decoration-color`プロパティを使用して、その値を上書きし、異なる色を使用することができます。
+    </dd>
+    <dt>[`text-emphasis-color`](#)</dt>
+    <dd>
+    テキスト内の各文字に隣接する強調記号をレンダリングする際に使用する色です。これは主に、東アジア言語のテキストを描画する際に使用します。
+    </dd>
+    <dt>[`caret-color`](#)</dt>
+    <dd>
+    要素の[キャレット](#)（テキスト入力カーソルとも表現されるもの）の描画に使用する色です。これは編集可能な要素でのみ有用であり、[`<input>`](#)や [`<textarea>`](#)またはHTMLの[`contenteditable`](#)属性が`true`に設定された要素に使用されます。
+    </dd>
+</dl>
+
+### ボックス
+
+すべての要素は中身があるボックスであり、そのボックスの内容に加えて、背景と境界線もあります。
+
+<dl className="definition-list">
+    <dt>境界線</dt>
+    <dd>
+    ボックスの境界線の色を設定できるCSSプロパティ一覧は、境界線の節を参照してください。
+    </dd>
+    <dt>[`background-color`](#)</dt>
+    <dd>
+    要素の内容がない領域で使用される背景色です。
+    </dd>
+    <dt>[`box-shadow`](#)</dt>
+    <dd>
+    ボックスに挿入する影とドロップシャドウ効果を構成します。それぞれの影のオプションには、影の基本色（これはぼかされ、他の引数に基づいて背景と混合されます）が含まれます。
+    </dd>
+    <dt>[`column-rule-color`](#)</dt>
+    <dd>
+    [CSS段組みレイアウト](#)を使用しているときに、テキストの列を区切る線に使う色です。
+    </dd>
+    <dt>[`outline-color`](#)</dt>
+    <dd>
+    要素の外側に輪郭を描画する際に使用する色です。この輪郭は、文書内の補助的な空間を確保しないという点で、ボーダーとは異なります。輪郭は[ボックスモデル](#)には参加せず、他のコンテンツと重複します。輪郭は一般的にフォーカスインジケーターとして使用され、現在どの要素がフォーカスを持っており、キーボード入力イベントを受信するかを示します。
+    </dd>
+</dl>
+
+### 境界線
+
+あらゆる要素で、周囲に境界線を描画することができます。基本的な要素の境界線は、要素のコンテンツの辺を囲むように描かれた線です。要素とその境界線の関係性については、[ボックスモデル](#)を、より詳しい境界線へのスタイルの適用については[CSSでの境界線のスタイル設定](#)を参照してください。
+
+[`border`](#)一括指定プロパティを使用することもできます。これは、境界線に関する（色以外の[線幅](#)、[線種](#)（実線、破線など）などの特性も含んだ）すべての設定をこれ一つで行えます。
+
+<dl className="definition-list">
+    <dt>[`border-color`](#)一括指定</dt>
+    <dd>
+    要素の境界線の各辺に使用する単一の色を指定します。
+    </dd>
+    <dt>[`border-left-color`](#), [`border-right-color`](#), [`border-top-color`](#), [`border-bottom-color`](#)</dt>
+    <dd>
+    要素の境界線の各辺に対応する色を指定できます。
+    </dd>
+    <dt>[`border-block-start-color`](#), [`border-block-end-color`](#)</dt>
+    <dd>
+    これらは、境界線が囲むブロックの先頭と末尾に最も近い境界線の描画色を設定することができます。左から右への書き方（英語の書き方など）では、ブロック先頭の境界線は上端、ブロック末尾の境界線は下端になります。これは、インラインの先頭とインラインの末尾である左右の（ボックス内の各行のテキストの先頭と末尾の位置に対応する）端とは異なります。
+    </dd>
+    <dt>[`border-inline-start-color`](#), [`border-inline-end-color`](#)</dt>
+    <dd>
+    これらは、ボックス内のテキスト行の先頭と末尾に最も近い境界線の縁に色を付けられます。どちら側になるかは [`writing-mode`](#)、[`direction`](#)、[`text-orientation`](#)プロパティによって異なり、ふつうは（ただし常にではなく）表示する言語の書字方向に基づいて調整されます。例えば、ボックスのテキストが右から左に描画される場合、`border-inline-start-color`は境界線の右側に適用されます。
+    </dd>
+</dl>
+
+## スタイルシートで色を値として指定
+
+[スタイルシート](#)で色を使用する例を見ていきましょう。この例では、前回ご紹介したプロパティをいくつか使用していますが、CSSで色を適用するという概念は、プロパティに関係なく同じです。
+
+作成するコードを見ていく前に、まずは結果を見ていきましょう。
+
+<p class="codepen" data-height="300" data-default-tab="result" data-slug-hash="LEZJLyZ" data-pen-title="Untitled" data-user="smsmdsgn" style="height: 300px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 2px solid; margin: 1em 0; padding: 1em;">
+      <span>See the Pen <a href="https://codepen.io/smsmdsgn/pen/LEZJLyZ">
+  Untitled</a> by SHIMASHIMA DESIGN (<a href="https://codepen.io/smsmdsgn">@smsmdsgn</a>)
+  on <a href="https://codepen.io">CodePen</a>.</span>
+      </p>
+      <script async src="https://public.codepenassets.com/embed/index.js"></script>
+
+### HTML
+
+上記の例を生成するHTMLは、次のとおりです。
+
+```html
+<div class="wrapper">
+  <div class="boxLeft">
+    <p>This is the first box.</p>
+  </div>
+  <div class="boxRight">
+    <p>This is the second box.</p>
+  </div>
+</div>
+```
+
+ここでは、ラッパーの[`<div>`](#)の中に2つの子`<div>`があり、それぞれに単一の子段落（[`<p>`](#)）があります。それぞれの中身の`<div>`は、異なる外観とデザインが指定されています。
+
+### CSS
+
+上記の結果を作成するCSSを、1つずつ見ていきましょう。
+
+:::note
+この例では、複数の[異なるCSS色値型](#)を使用して、その使用方法を説明しています。これは、実稼働コードには推奨されません。CSSを書く際には、ご自身やチームにとって最もわかりやすい値型を使用してください。
+:::
+
+```css
+.wrapper {
+  height: 110px;
+  padding: 10px;
+  display: flex;
+  gap: 10px;
+  text-align: center;
+  font:
+    28px "Marker Felt",
+    "Zapfino",
+    cursive;
+  border: 6px solid mediumturquoise;
+}
+
+div {
+  flex: 1;
+}
+```
+
+`.wrapper`クラスは、他のすべてのコンテンツを囲む[`<div>`](#)にスタイルを割り当てるために使っています。これにより、[`height`](#)を使用してコンテナーの高さが確定し、このブロックレベル要素の幅は既定では親の100%になります。[`display`](#)を`flex`に設定し、10pxの[`gap`](#)を追加すると、フレックスコンテナーが作成され、コンテナーのすべての要素の間に隙間を空けて子要素が並べられます。[`flex`](#)を使用すると、フレックスの子要素がコンテナーを埋めるように拡大します。フレックスコンテナーそのものにはまったく効果はありません。
+
+ここでの議論でさらに興味深いのは、[`border`](#)プロパティで要素の外縁に境界線を設定していることです。この境界線は幅6ピクセルの実線で、[名前付き色](#)は `mediumturquoise`です。
+
+ラッパー内には、左ボックスと右ボックスがあります。
+
+```css
+.boxLeft {
+  background-color: rgb(245 130 130);
+  outline: 2px solid darkred;
+}
+```
+
+`.boxLeft`クラスは、左側のボックスのスタイルとして巧みに使われ、以下のようにボックスを左側に浮かせて色を設定しています。
+
+- 背景色は、CSSの[`background-color`](#)プロパティを`rgb(245 130 130)`の[`rgb()`](#)関数記法を使用して設定しています。
+- ボックスの輪郭線が定義されています。一般的に使用される境界線（[`border`](#)）とは異なり、輪郭線（[`outline`](#)）はレイアウトにまったく影響を与えません。境界線のように空間を占有するのではなく、要素のボックスの外側に何かが存在する場合、その上に描画されます。この輪郭線は、2ピクセルの太さの濃い赤色の線です。色を指定する際に、`darkred`キーワードを使用している点に注目してください。
+- テキストの色を明示的に設定していないことに注意してください。この場合[`color`](#)の値はそれを含んだ最も近い要素から継承されます。既定では、黒です。
+
+{/* コメントはこう書くらしい */}
+
+```css
+.boxRight {
+  background-color: hwb(270deg 63% 13%);
+  outline: 4px dashed #6e1478;
+  color: hsl(0deg 95% 95%);
+  text-decoration-line: underline;
+  text-decoration-style: wavy;
+  text-decoration-color: #8f8;
+  text-decoration: underline wavy #8f8;
+  text-shadow: 2px 2px 3px black;
+}
+```
+
+:::note
+ここでは`text-decoration-*`スタイルを個別に設定しましたが、これはSafariが[`text-decoration`](#)を一括指定プロパティとして対応していないためです。
+:::
+
+最後に、`.boxRight`クラスは、右側に描画するボックスにいくつかのスタイルを設定します。そして、以下の色が設定されます（[色値](#)の5つの異なる宣言方法を使用します）。
+
+- `background-color`は[`hwb()`](#)関数記法を使用して`hwb(270deg 63% 13%)`と設定しています。この色は中くらいの紫色です。
+- ボックスの`outline`を使用して、ボックスを囲む4ピクセルの太さの破線を指定します。色は、6桁の[`<hex-color>`](#) `#6e1478`を使用して、やや濃い紫色を指定します。
+- 前景色（テキスト）は、[`color`](#)プロパティで[hsl()](#)関数記法を使用して、`hsl(0deg 100% 100%)`と指定します。これは、白色を指定する多くの方法のうちの1つです。
+- [`text-decoration`](#)の一括指定でテキストの下に緑色の波線行を追加し、ブラウザー互換性を確保するために個別指定の部分も残しています。3桁の16進数カラーコード[`<hex-color>`](#) `#8f8`（`#88ff88`と同じ）を使用しました。
+- 最後に、[`text-shadow`](#)を使用してテキストに少しだけ影をつけています。この`color`引数は`black`と、[`<named-color>`](#)値にしています。
+
+私たちは、可能性を示すために 5 つの異なる色の構文を使用しました。実際の現場では、できればチームで推奨する色の表記法を選択し、一つのコードベースで作業する全員が同じ色の構文を使用することが望ましいでしょう。
+
+### 色をつける他の方法
+
+CSS が唯一の色を付けるためのウェブ技術ではありません。色に対応している、ウェブで使用可能なグラフィック技術があります。
+
+<dl className="definition-list">
+    <dt>HTMLの[キャンバスAPI](#)</dt>
+    <dd>
+    キャンバスAPIでは、2Dのビットマップ画像を[`<canvas>`](#)要素の中に描画できます。より詳しくは[キャンバスチュートリアル](#)を参照してください。
+    </dd>
+    <dt>[SVG](#) (Scalable Vector Graphics)</dt>
+    <dd>
+    SVGならば、特定の形状、パターン、線を描くコマンドで画像を描画できます。SVGのコマンドはXMLの形式となっており、直接ウェブページに埋め込めます。また、[`<img>`](#)要素を使うと他の画像と同じような配置もできます。
+    </dd>
+    <dt>[WebGL](#)</dt>
+    <dd>
+    Web Graphics LibraryはOpenGL ESを基にしたAPIで、ウェブ上に2Dや 3Dのハイパフォーマンスなグラフィックを描画できます。より詳しくは[WebGLチュートリアル](#)を参照してください。
+    </dd>
+</dl>
+
+:::note
+すでに廃止されている HTML属性には、`bgcolor`や`vlink`のように、色を値として受け入れるものがいくつかあります。これらの属性では、[`<named-color>`](#)と3 桁または6桁の[`<hex-color>`](#)値のみを受け入れます。
+:::
+</section>
+
+:::feedback
+:::

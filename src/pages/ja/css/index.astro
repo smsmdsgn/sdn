@@ -1,0 +1,39 @@
+---
+import Layout from "../../../layouts/Layout.astro";
+import SectionIndex from "../../../components/SectionIndex.astro";
+
+const title = "CSS";
+---
+
+<Layout title={title}>
+	<SectionIndex title={title}>
+		<p>
+			カスケーディングスタイルシート (Cascading Style Sheets、CSS)
+			はスタイルシート言語であり、HTML や XML（派生言語である
+			SVG、MathML、XHTML
+			などを含む）で記述された文書の体裁や見栄えを表現するために用いられます。CSS
+			は、要素が画面上で (あるいは紙や音声といった別のメディア上で)
+			どのように表現されるのかを定義します。
+		</p>
+		<p>
+			CSS はオープンウェブの核となる言語に含まれており、W3C
+			標準仕様によってウェブブラウザー間で標準化されています。以前は CSS
+			仕様書の様々な部分が同時に開発されており、最新勧告の版数付けができていました。皆さんも
+			CSS1、CSS2.1、また CSS3 についても聞いたことがあるでしょう。CSS3 や
+			CSS4 にはなりません。すべて単なる "CSS"
+			と、バージョン番号を持つ個々の CSS モジュールとなりました。
+		</p>
+		<p>
+			CSS 2.1
+			以降、仕様の範囲が大幅に拡大し、CSSモジュールごとに進捗状況が大きく異なるようになったため、モジュールごとに勧告を開発して公開することがより効果的になりました。W3C
+			では、CSS 仕様のバージョン管理の代わりに、最新の CSS
+			仕様の安定した状態のスナップショットと独立したモジュールの進捗を定期的に取得するようになりました。CSS
+			のモジュールは、CSS Color Module Level 5
+			のように、バージョン番号またはレベルを持つようになりました。
+		</p>
+		<ul>
+			<li><a href="/ja/css/guide/">ガイド</a></li>
+			<li><a href="/ja/css/reference/">リファレンス</a></li>
+		</ul>
+	</SectionIndex>
+</Layout>

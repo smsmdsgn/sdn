@@ -1,0 +1,148 @@
+---
+layout: ../../../../../layouts/Layout.astro
+title: overscroll-behavior property
+short-title: overscroll-behavior
+source:
+  url: https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/overscroll-behavior
+  title: overscroll-behavior
+createdAt: 2026-04-27
+updatedAt: 2026-04-27
+---
+
+<section className="main__header">
+# overscroll-behavior property
+
+<details className="baseline-info baseline-info--limited">
+  <summary className="baseline-info__head">
+    <span className="baseline-info__status-icon" role="img"></span>
+    <p className="baseline-info__status-title">Limited availability</p>
+    <ul className="baseline-info__engine-list">
+      <li className="baseline-info__engine-item">
+        <span className="baseline-info__engine-icon" data-browser="chrome" data-supported="full"></span>
+        <span className="baseline-info__engine-icon" data-browser="edge" data-supported="full"></span>
+      </li>
+      <li className="baseline-info__engine-item">
+        <span className="baseline-info__engine-icon" data-browser="firefox" data-supported="full"></span>
+      </li>
+      <li className="baseline-info__engine-item">
+        <span className="baseline-info__engine-icon" data-browser="safari" data-supported="none"></span>
+      </li>
+    </ul>
+    <span className="baseline-info__toggle-icon"></span>
+  </summary>
+  <div className="baseline-info__body">
+    <p className="baseline-info__desc">This feature is not Baseline because it does not work in some of the most widely-used browsers.</p>
+    <p className="baseline-info__signal">Want more browser support for this feature? <a href="https://github.com/web-platform-dx/developer-signals/issues/567" className="external-link">Tell us why.</a></p>
+    <ul className="baseline-info__link-list">
+      <li className="baseline-info__link-item">
+        <a href="#">Learn more</a>
+      </li>
+      <li className="baseline-info__link-item">
+        <a href="#" className="external-link">See full compatibility (Go to "caniuse.com")</a>
+      </li>
+      <li className="baseline-info__link-item">
+        <a href="#">Report feedback</a>
+      </li>
+    </ul>
+  </div>
+</details>
+
+The `overscroll-behavior` CSS property sets what a browser does when reaching the boundary of a scrolling area.
+</section>
+
+<div data-toc-marker />
+
+<section className="main__body">
+## Constituent properties
+This property is a shorthand for the following CSS properties:
+- [`overscroll-behavior-x`](#)
+- [`overscroll-behavior-y`](#)
+
+## Syntax
+```css
+/* Keyword values */
+overscroll-behavior: auto; /* default */
+overscroll-behavior: contain;
+overscroll-behavior: none;
+
+/* Two values */
+overscroll-behavior: auto contain;
+
+/* Global values */
+overscroll-behavior: inherit;
+overscroll-behavior: initial;
+overscroll-behavior: revert;
+overscroll-behavior: revert-layer;
+overscroll-behavior: unset;
+```
+
+The `overscroll-behavior` property is specified as one or two keywords chosen from the list of values bellow.
+
+Two keywords specified the `overscroll-behavior` value on the `x` and `y` axes respectively. If only one value is specified, both x and y are assumed to have the same value.
+
+### Values
+
+<dl className="definition-list">
+  <dt>`auto`</dt>
+  <dd>The default scroll overflow behavior occurs as normal.</dd>
+  <dt>`contain`</dt>
+  <dd>Default scroll overflow behavior (e.g., "bounce" effects) is observed inside the element where this value is set. However, no scroll chaining occurs on neighboring scrolling areas; the underlying elements will not scroll. The `contain` value disables native browser navigation, including the vertical pull-to-refresh gesture and horizontal swipe navigation.</dd>
+  <dt>`none`</dt>
+  <dd>No scroll chaining occurs to neighboring scrolling areas, and default scroll overflow behavior is prevented.</dd>
+</dl>
+
+## Description
+
+By default, mobile browsers tend to provide a "bounce" effect or even a page refresh when the top or bottom of a page (or other scroll area) is reached. You may also have noticed that when you have a dialog box with scrolling content at the top of a page that also has scrolling content, once the dialog box's [scroll boundary](#) is reached, the underlying page will then start to scroll — this is called [scroll chaining](#).
+
+In some cases, these behaviors are not desirable. You can use `overscroll-behavior` to get rid of unwanted scroll chaining and the browser's Facebook/Twitter app-inspired "pull to refresh"-type behavior.
+
+Note that this property applies only to [scroll containers](#). In particular, since an `<iframe>` is not a scroll container, setting this property on an iframe has no effect. To control scroll chaining from an iframe, set `overscroll-behavior` on both the [`<html>`](#) and the [`<body>`](#) elements of the iframe's document.
+
+A [scroll container](#) that has no scrollable overflow, such as an element with overflow: hidden, is always considered to be at its [scroll boundary](#). So setting a non-default overscroll-behavior such as contain or none on it will prevent scroll chaining to ancestor scroll containers. This can be used to prevent background scrolling while a dialog or overlay is open.
+
+## Examples
+
+### Preventing an underlying element from scrolling
+
+下記の例は、全画面で擬似連絡先の一覧を、チャットウィンドウのついたダイアログボックスで表示します。
+The example below displays a full-page list of fake contacts, and a dialog box containing a chat window.
+
+<p class="codepen" data-height="900" data-pen-title="overscroll-behavior-01" data-version="2" data-default-tab="result" data-slug-hash="WbowmNr" data-user="smsmdsgn" style="height: 900; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 2px solid; margin: 1em 0; padding: 1em;">
+  <span>See the Pen <a href="https://codepen.io/editor/smsmdsgn/pen/019e13b1-c4b7-7179-b4de-62bae3df45ce">
+  overscroll-behavior-01</a> by SHIMASHIMA DESIGN (<a href="https://codepen.io/smsmdsgn">@smsmdsgn</a>)
+  on <a href="https://codepen.io">CodePen</a>.</span>
+</p>
+<script async src="https://public.codepenassets.com/embed/index.js"></script>
+
+Both of these areas scroll; normally if you scrolled the chat window until you hit a scroll boundary, the underlying contacts window would start to scroll too, which is not desirable. This can be stopped using `overscroll-behavior-y` (`overscroll-behavior` would also work) on the chat window, like this:
+
+```css
+.messages {
+  height: 220px;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+```
+
+We also wanted to get rid of the standard overscroll effects when the contacts are scrolled to the top or bottom (e.g., Chrome on Android refreshes the page when you scroll past the top boundary). This can be prevented by setting `overscroll-behavior: none` on the [`<html>`](#) element:
+
+```css
+html {
+  margin: 0;
+  overscroll-behavior: none;
+}
+```
+
+The following is an example of a horizontal scroll.
+
+<p class="codepen" data-height="500" data-pen-title="overscroll-behavior-02" data-version="2" data-default-tab="result" data-slug-hash="OPbNqWV" data-user="smsmdsgn" style="height: 500; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 2px solid; margin: 1em 0; padding: 1em;">
+  <span>See the Pen <a href="https://codepen.io/editor/smsmdsgn/pen/019e13d4-63e8-7c83-9099-e0e9e26cef1f">
+  overscroll-behavior-02</a> by SHIMASHIMA DESIGN (<a href="https://codepen.io/smsmdsgn">@smsmdsgn</a>)
+  on <a href="https://codepen.io">CodePen</a>.</span>
+</p>
+<script async src="https://public.codepenassets.com/embed/index.js"></script>
+</section>
+
+:::feedback
+:::

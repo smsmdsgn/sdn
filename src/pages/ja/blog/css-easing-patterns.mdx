@@ -1,0 +1,517 @@
+---
+layout: ../../../layouts/Layout.astro
+title: CSSイージング関数の基本と選び方―キーワードからcubic-bezier()、linear()、steps()まで
+desc: CSSのイージング関数（ease・ease-out・cubic-bezier()・linear()・steps()）の定義と動きの違いを数値で比較し、登場・退場・フェードなど場面ごとの選び方、時間の目安、アクセシビリティとパフォーマンスの注意点までを公式情報にもとづいて解説します。
+slug: css-easing-patterns
+createdAt: 2025-09-02T00:00:00+09:00
+updatedAt: 2026-11-11T00:00:00+09:00
+author: Shimashima
+author-url: https://shimashima.design
+thumbnail: /assets/img/blog/ja/css-easing-patterns/img-thumb.avif
+---
+
+<section className="main__header">
+アニメーションで「時間の経過」と「変化の進み具合」の対応を決めるのが、イージング（easing）です。同じ距離を同じ時間で動かしても、イージングが違うだけで、操作に機敏に応える動きにも、もたついて見える動きにもなります。
+
+本稿では、CSSで使えるイージング関数の種類と定義、動きの違いの数値での比較、場面ごとの選び方と時間の目安、`cubic-bezier()`や`linear()`を使った細かな調整、そしてアクセシビリティとパフォーマンスの注意点までを整理します。
+</section>
+
+<div data-toc-marker />
+
+<section className="main__body">
+## イージングとは
+
+イージングは、アニメーションの経過時間の割合（0〜1）を受け取り、変化の進み具合（0〜1）を返す関数です。横軸に時間、縦軸に進み具合をとったグラフで表すと、線の傾きが急な区間ほど速く、緩やかな区間ほどゆっくり変化していることになります。
+
+
+手描きアニメーションの世界では、ゆっくり動き出して加速する動きを「スローイン」、すばやく動き出して減速する動きを「スローアウト」と呼んできました。Webではこれを「イーズイン（ease-in）」「イーズアウト（ease-out）」と呼び、両方を組み合わせたものを「イーズインアウト（ease-in-out）」、加減速のない一定の速さの動きを「リニア（linear）」と呼びます。
+
+現実の物体は、動き出すときに加速し、止まるときに減速します。人はそうした動きを自然だと感じるため、UIのアニメーションでも、場面に合った加減速を付けることで、動きの意味が伝わりやすくなります。
+
+## CSSのイージング関数
+
+CSSのイージング関数は、W3CのCSS Easing Functions仕様で定義されており、次の3種類に分けられます。
+
+| 種類 | 関数・キーワード | 特徴 |
+| --- | --- | --- |
+| 線形 | `linear`、`linear()` | 点と点の間を直線で結ぶ |
+| 3次ベジェ曲線 | `cubic-bezier()`、`ease`、`ease-in`、`ease-out`、`ease-in-out` | なめらかな曲線で加減速する |
+| ステップ | `steps()`、`step-start`、`step-end` | 段階的に切り替わる |
+
+### キーワード
+
+よく使う5つのキーワードは、それぞれ次の値として定義されています。`linear`以外は、`cubic-bezier()`の特定の値に名前を付けたものです。
+
+| キーワード | 定義 | 動き |
+| --- | --- | --- |
+| `linear` | `linear(0, 1)` | 最初から最後まで一定の速さ |
+| `ease` | `cubic-bezier(0.25, 0.1, 0.25, 1)` | すばやく加速し、後半の長い時間をかけて減速する |
+| `ease-in` | `cubic-bezier(0.42, 0, 1, 1)` | ゆっくり動き出し、加速したまま終わる |
+| `ease-out` | `cubic-bezier(0, 0, 0.58, 1)` | 最初が最も速く、減速しながら終わる |
+| `ease-in-out` | `cubic-bezier(0.42, 0, 0.58, 1)` | ゆっくり動き出し、ゆっくり終わる（左右対称） |
+
+`transition-timing-function`と`animation-timing-function`の初期値は`ease`です。何も指定しなければ`ease`で動きます。
+
+### 進み具合を数値で比べる
+
+各キーワードについて、経過時間ごとの進み具合を計算すると次のようになります。
+
+| キーワード | 時間10% | 時間25% | 時間50% | 時間75% |
+| --- | --- | --- | --- | --- |
+| `linear` | 10.0% | 25.0% | 50.0% | 75.0% |
+| `ease` | 9.5% | 40.9% | 80.2% | 96.0% |
+| `ease-in` | 1.7% | 9.3% | 31.5% | 62.2% |
+| `ease-out` | 16.1% | 37.8% | 68.5% | 90.7% |
+| `ease-in-out` | 2.0% | 12.9% | 50.0% | 87.1% |
+
+この表から、次のような違いが読み取れます。
+
+- **動き出しが最も速いのは`ease-out`です。** 時間10%の時点で16.1%進んでおり、操作に対してすぐに反応が返ります。
+- **`ease`は中盤で大きく先行します。** 動き出しは`ease-out`より遅いものの、時間50%の時点で約80%まで進み、残りの時間を最後のわずかな変化に使います。
+- **`ease-in`は半分の時間が過ぎても約3割しか進みません。** 操作をきっかけに動かすと、反応が遅れているように見えます。
+
+`ease`と`ease-out`はどちらも減速して終わりますが、速く動く区間が違います。どちらかが一方的に優れているわけではなく、反応の速さを優先するか、中盤の勢いを優先するかで選び分けます。
+
+実際の動きと曲線を並べて比べてみましょう。「再生」を押すと、5つの点が同時に動きます。
+
+<p class="codepen" data-height="420" data-pen-title="css-easing-demo-01" data-version="2" data-default-tab="result" data-slug-hash="TODO-01" data-user="smsmdsgn" style="height: 420px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 2px solid; margin: 1em 0; padding: 1em;">
+  <span>See the Pen <a href="https://codepen.io/smsmdsgn/pen/TODO-01">
+  css-easing-demo-01</a> by SHIMASHIMA DESIGN (<a href="https://codepen.io/smsmdsgn">@smsmdsgn</a>)
+  on <a href="https://codepen.io">CodePen</a>.</span>
+</p>
+
+### cubic-bezier()
+
+`cubic-bezier()`は、3次ベジェ曲線で独自のイージングを作る関数です。始点`(0, 0)`と終点`(1, 1)`は固定で、2つの制御点`(x1, y1)`と`(x2, y2)`の座標を指定します。
+
+```css
+.panel {
+  /* cubic-bezier(x1, y1, x2, y2) */
+  transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+}
+```
+
+x座標（時間）は0〜1の範囲で指定する必要があり、範囲外の値を指定すると無効になります。一方、y座標（進み具合）は0〜1の範囲を超えてもかまいません。yに1を超える値を指定すると、終点を一度通り過ぎてから戻る「行き過ぎ」の動きになります。
+
+```css
+.badge {
+  /* y2が1を超えるため、目標を少し行き過ぎてから戻る */
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+```
+
+制御点の数値だけで動きを想像するのは難しいため、ブラウザの開発者ツールを活用しましょう。主要ブラウザの開発者ツールでは、スタイルの編集画面からイージングのエディターを開き、曲線をドラッグして形を確認しながら値を調整できます。
+
+### linear()
+
+`linear()`は、複数の点を指定し、その間を直線で結んでイージングを作る関数です。CSS Easing Functions Level 2で追加されました。
+
+```css
+.box {
+  /* 時間の75%の時点で進み具合を0.25にする */
+  animation-timing-function: linear(0, 0.25 75%, 1);
+}
+```
+
+各点には進み具合の値を書き、必要に応じて時間の位置をパーセンテージで添えます。位置を省略した点は、前後の点の間に等間隔で配置されます。`linear`キーワードは`linear(0, 1)`と同じ意味です。
+
+点を細かく打てば任意の曲線を近似できるため、`cubic-bezier()`では表現できない、何度も跳ね返るバウンスや、振動しながら止まる弾性の動きも作れます（後述）。
+
+`linear()`は、Chrome 113・Edge 113・Firefox 112・Safari 17.2で使えるようになり、2023年12月に主要ブラウザすべてで利用可能になりました。
+
+### steps()
+
+`steps()`は、なめらかに変化させず、指定した段数で段階的に切り替える関数です。パラパラ漫画のようなスプライトアニメーションや、時計の秒針のような動きに使います。
+
+```css
+.sprite {
+  width: 64px;
+  height: 64px;
+  overflow: hidden;
+}
+
+/* 8コマを横に並べた幅512pxの画像を、1コマずつ切り替える */
+.sprite__image {
+  width: 512px;
+  animation: walk 0.8s steps(8) infinite;
+}
+
+@keyframes walk {
+  to {
+    transform: translateX(-100%);
+  }
+}
+```
+
+2つ目の引数で、どのタイミングで値が切り替わるかを指定します。
+
+| 指定 | 動き |
+| --- | --- |
+| `jump-end`（`end`） | 各区間の終わりで切り替わる。最初は0から始まり、1には達しない。省略時の初期値 |
+| `jump-start`（`start`） | 各区間の始まりで切り替わる。最初から1段進んだ状態で始まる |
+| `jump-none` | 0と1の両方を含めて段階を分ける |
+| `jump-both` | 0と1のどちらにも達しない |
+
+上の例で`translateX(-100%)`まで動かしても空のコマが表示されないのは、初期値の`jump-end`では最後の値（1）に達しないためです。8段階で0〜7コマ目だけが表示されます。なお、`step-start`は`steps(1, start)`、`step-end`は`steps(1, end)`の省略形です。
+
+## イージングの指定方法
+
+### CSSトランジション
+
+状態が変わったときのアニメーションは、`transition`で指定します。プロパティごとに、時間とイージングを分けて書けます。
+
+```css
+.link__arrow {
+  opacity: 0.6;
+  /* 移動には減速を、不透明度には等速を使う */
+  transition:
+    transform 0.25s cubic-bezier(0.23, 1, 0.32, 1),
+    opacity 0.25s linear;
+}
+
+.link:hover .link__arrow {
+  opacity: 1;
+  transform: translateX(4px);
+}
+```
+
+`transition: all 0.3s ease`のように`all`を使うと、意図しないプロパティまでアニメーションしたり、プロパティごとにイージングを変えられなかったりします。対象のプロパティは明示しましょう。
+
+トランジションには、**変化した後の状態に書かれた`transition`が使われる**という性質があります。これを利用すると、表示するときと隠すときで、時間やイージングを変えられます。
+
+```css
+/* 閉じた状態：ここに書いた値が「閉じるとき」に使われる */
+.menu {
+  opacity: 0;
+  transform: translateY(-8px);
+  transition:
+    opacity 0.15s linear,
+    transform 0.15s cubic-bezier(0.755, 0.05, 0.855, 0.06);
+}
+
+/* 開いた状態：ここに書いた値が「開くとき」に使われる */
+.menu.is-open {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 0.3s linear,
+    transform 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+}
+```
+
+### CSSアニメーション
+
+`@keyframes`で定義したアニメーションには、`animation`でイージングを指定します。
+
+```css
+.badge {
+  animation: pop-in 0.4s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+```
+
+注意したいのは、**イージングはアニメーション全体ではなく、キーフレームの区間ごとに適用される**点です。`0%`・`50%`・`100%`の3つのキーフレームに`ease-out`を指定すると、前半と後半のそれぞれで減速します。キーフレームの中に`animation-timing-function`を書けば、区間ごとにイージングを変えることもできます。
+
+```css
+/* 落下は加速、跳ね上がりは減速させて、1回だけ跳ねる */
+@keyframes drop {
+  0% {
+    transform: translateY(-120px);
+    animation-timing-function: ease-in;
+  }
+  70% {
+    transform: translateY(0);
+    animation-timing-function: ease-out;
+  }
+  85% {
+    transform: translateY(-16px);
+    animation-timing-function: ease-in;
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+```
+
+### Web Animations API
+
+JavaScriptの`Element.animate()`では、オプションの`easing`にCSSと同じ書式で指定します。
+
+```js
+const toast = document.querySelector('.toast');
+
+toast.animate(
+  [
+    { opacity: 0, transform: 'translateY(24px)' },
+    { opacity: 1, transform: 'none' },
+  ],
+  {
+    duration: 400,
+    easing: 'cubic-bezier(0.23, 1, 0.32, 1)',
+    fill: 'forwards',
+  },
+);
+```
+
+CSSのトランジションやアニメーションと違い、Web Animations APIの`easing`の初期値は`linear`です。指定し忘れると等速で動くので注意しましょう。
+
+## 場面ごとの選び方
+
+Googleがweb.devで公開しているアニメーションのガイドや、マテリアルデザインのモーションのガイドラインでは、要素の動きの役割に応じてイージングを使い分けることが推奨されています。ここでは代表的な場面ごとに整理します。
+
+### 画面に入る要素は減速させる
+
+モーダル、メニュー、通知など、画面に新しく現れる要素には、減速するイージング（ease-out系）を使うのが基本です。動き出しが速いため操作への反応が良く感じられ、終わりはなめらかに止まります。
+
+CSSの`ease-out`キーワードでも減速しますが、より減速の強いカーブを使うと、反応の速さがはっきりします。web.devでは、UI要素の動きにはQuint（5次関数）の減速カーブが勧められています。強さの違いは「イージングの強さ」で詳しく扱います。
+
+### 画面から出る要素は加速させる
+
+閉じたり消えたりする要素には、加速するイージング（ease-in系）を使います。ゆっくり動き出して勢いよく画面から去るため、「出ていく」動きであることが伝わります。
+
+加速カーブは終わりが急に止まって見えますが、画面から出ていく要素であれば、止まる瞬間はほとんど目に入りません。また、ユーザーの関心はすでに次の画面に移っているため、退場の時間は登場より短くするのが一般的です。
+
+次のデモで、登場と退場でイージングと時間を変えた場合と、どちらも等速の場合を比べてみましょう。「通知を表示」「通知を閉じる」を交互に押してください。
+
+<p class="codepen" data-height="380" data-pen-title="css-easing-demo-02" data-version="2" data-default-tab="result" data-slug-hash="TODO-02" data-user="smsmdsgn" style="height: 380px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 2px solid; margin: 1em 0; padding: 1em;">
+  <span>See the Pen <a href="https://codepen.io/smsmdsgn/pen/TODO-02">
+  css-easing-demo-02</a> by SHIMASHIMA DESIGN (<a href="https://codepen.io/smsmdsgn">@smsmdsgn</a>)
+  on <a href="https://codepen.io">CodePen</a>.</span>
+</p>
+
+### 画面内での移動には加減速を使う
+
+タブの下線の移動や、カードの並べ替えなど、画面の中である位置から別の位置へ動く要素には、加速してから減速するイージング（ease-in-out系）が合います。始まりと終わりの両方がなめらかなため、移動の経路を目で追いやすくなります。
+
+ただし、ゆっくり始まる分だけ反応が遅く感じられるため、ユーザーの操作の直後に動かす場合は、時間を短めにしましょう。
+
+### 不透明度や色の変化は等速か弱い減速にする
+
+不透明度（`opacity`）や色の変化に強い減速カーブを使うと、終盤の変化がほとんど見えず、止まっているように感じられます。たとえばeaseOutQuintは、時間の約45%で変化の95%に達し、残りの約55%の時間を最後の5%の変化に使います。不透明度が95%から100%に変わる差は目ではほとんど区別できないため、その間は動きが止まって見えるのです。
+
+フェードには`linear`か、easeOutSineのような弱い減速カーブを使い、時間を短めにすると、間延びせずテンポよく見えます。次のデモでは、3つの項目を順番にフェードインさせています。左の強い減速では、項目と項目の間に間が空いて見えます。
+
+<p class="codepen" data-height="420" data-pen-title="css-easing-demo-03" data-version="2" data-default-tab="result" data-slug-hash="TODO-03" data-user="smsmdsgn" style="height: 420px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 2px solid; margin: 1em 0; padding: 1em;">
+  <span>See the Pen <a href="https://codepen.io/smsmdsgn/pen/TODO-03">
+  css-easing-demo-03</a> by SHIMASHIMA DESIGN (<a href="https://codepen.io/smsmdsgn">@smsmdsgn</a>)
+  on <a href="https://codepen.io">CodePen</a>.</span>
+</p>
+
+### 継続的な動きには等速を使う
+
+ローディングの回転、プログレスバー、横に流れ続けるテキストなど、始まりと終わりを意識させない継続的な動きには`linear`を使います。加減速を付けると、ループのつなぎ目で速さが変わり、引っかかって見えます。
+
+### アニメーションの時間の目安
+
+イージングと同じくらい重要なのが、アニメーションの長さです。短すぎると唐突に、長すぎると操作の邪魔に感じられます。web.devのガイドでは、次のような目安が示されています。
+
+| 動き | 時間の目安 |
+| --- | --- |
+| 減速（ease-out系）・加速（ease-in系） | 200〜500ミリ秒 |
+| バウンス・弾性 | 800〜1,200ミリ秒 |
+
+この範囲の中で、ホバーやボタンの押下のように操作に直接応える小さな変化は短めに、移動距離が大きい動きや画面全体の切り替えは長めにします。退場は登場より短くするのが基本です。
+
+場面ごとの選び方をまとめると、次のようになります。
+
+| 場面 | イージング | 時間 |
+| --- | --- | --- |
+| 画面に入る（モーダル、メニュー、通知） | 減速（ease-out系） | 200〜500ミリ秒 |
+| 画面から出る | 加速（ease-in系） | 登場より短め |
+| 画面内で移動・変形する | 加減速（ease-in-out系） | 短め |
+| ホバーなど操作への即時の反応 | 減速（ease-out系） | 短め |
+| 不透明度・色の変化 | 等速、または弱い減速 | 短め |
+| ローディングなど継続的な動き | 等速（`linear`） | ― |
+| 跳ねる・弾む演出 | `linear()`によるバウンス・弾性 | 800〜1,200ミリ秒 |
+
+## イージングの強さ
+
+減速・加速の度合いには、Robert Penner氏が2000年代初頭にFlash（ActionScript）向けに公開したイージングの数式に由来する名前が広く使われています。名前は、もとになった数式を表しています。
+
+| 名前 | もとになった数式 | 強さ |
+| --- | --- | --- |
+| Sine | 正弦（サイン）関数 | 最も弱い |
+| Quad | 2乗（Quadratic） | ↓ |
+| Cubic | 3乗 | ↓ |
+| Quart | 4乗（Quartic） | ↓ |
+| Quint | 5乗（Quintic） | ↓ |
+| Expo | 指数関数（Exponential） | 最も強い |
+| Circ | 円の方程式（Circular） | Expoに近い強さで、曲線の形が異なる |
+| Back | 行き過ぎてから戻る | ― |
+| Elastic | 減衰しながら振動する | ― |
+| Bounce | 何度か跳ね返って止まる | ― |
+
+減速カーブ（Out）の強さによって、進み具合がどう変わるかを比べてみます。強いカーブほど序盤で大きく進み、反応が速く感じられます。
+
+| 名前 | 時間10% | 時間25% | 時間50% |
+| --- | --- | --- | --- |
+| `ease-out`（キーワード） | 16.1% | 37.8% | 68.5% |
+| easeOutSine | 15.1% | 38.4% | 73.6% |
+| easeOutQuad | 18.7% | 45.3% | 77.1% |
+| easeOutCubic | 27.6% | 60.0% | 87.5% |
+| easeOutQuart | 38.8% | 69.8% | 91.5% |
+| easeOutQuint | 39.8% | 77.5% | 96.6% |
+| easeOutExpo | 48.0% | 84.4% | 97.8% |
+
+CSSの`ease-out`キーワードは、easeOutSineと同程度の弱い減速であることが分かります。
+
+<p class="codepen" data-height="520" data-pen-title="css-easing-demo-04" data-version="2" data-default-tab="result" data-slug-hash="TODO-04" data-user="smsmdsgn" style="height: 520px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 2px solid; margin: 1em 0; padding: 1em;">
+  <span>See the Pen <a href="https://codepen.io/smsmdsgn/pen/TODO-04">
+  css-easing-demo-04</a> by SHIMASHIMA DESIGN (<a href="https://codepen.io/smsmdsgn">@smsmdsgn</a>)
+  on <a href="https://codepen.io">CodePen</a>.</span>
+</p>
+
+SineからBackまでは、`cubic-bezier()`で近似した値が広く使われています。数値のままでは意図が伝わりにくいため、名前を付けたカスタムプロパティとして定義しておくと、チーム内で「Quintの減速で」のように共通の言葉で話せます。
+
+```css
+:root {
+  /* Sine */
+  --ease-in-sine: cubic-bezier(0.47, 0, 0.745, 0.715);
+  --ease-out-sine: cubic-bezier(0.39, 0.575, 0.565, 1);
+  --ease-in-out-sine: cubic-bezier(0.445, 0.05, 0.55, 0.95);
+
+  /* Quad */
+  --ease-in-quad: cubic-bezier(0.55, 0.085, 0.68, 0.53);
+  --ease-out-quad: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --ease-in-out-quad: cubic-bezier(0.455, 0.03, 0.515, 0.955);
+
+  /* Cubic */
+  --ease-in-cubic: cubic-bezier(0.55, 0.055, 0.675, 0.19);
+  --ease-out-cubic: cubic-bezier(0.215, 0.61, 0.355, 1);
+  --ease-in-out-cubic: cubic-bezier(0.645, 0.045, 0.355, 1);
+
+  /* Quart */
+  --ease-in-quart: cubic-bezier(0.895, 0.03, 0.685, 0.22);
+  --ease-out-quart: cubic-bezier(0.165, 0.84, 0.44, 1);
+  --ease-in-out-quart: cubic-bezier(0.77, 0, 0.175, 1);
+
+  /* Quint */
+  --ease-in-quint: cubic-bezier(0.755, 0.05, 0.855, 0.06);
+  --ease-out-quint: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out-quint: cubic-bezier(0.86, 0, 0.07, 1);
+
+  /* Expo */
+  --ease-in-expo: cubic-bezier(0.95, 0.05, 0.795, 0.035);
+  --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
+  --ease-in-out-expo: cubic-bezier(1, 0, 0, 1);
+
+  /* Circ */
+  --ease-in-circ: cubic-bezier(0.6, 0.04, 0.98, 0.335);
+  --ease-out-circ: cubic-bezier(0.075, 0.82, 0.165, 1);
+  --ease-in-out-circ: cubic-bezier(0.785, 0.135, 0.15, 0.86);
+
+  /* Back（yが0〜1を超え、行き過ぎてから戻る） */
+  --ease-in-back: cubic-bezier(0.6, -0.28, 0.735, 0.045);
+  --ease-out-back: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  --ease-in-out-back: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.modal {
+  transition: transform 0.4s var(--ease-out-quint);
+}
+```
+
+## linear()でバウンスや弾性を表現する
+
+ElasticとBounceは、途中で何度も向きが変わるため、1本の3次ベジェ曲線では表現できません。そこで`linear()`を使い、数式から計算した点を細かく並べて近似します。
+
+```css
+:root {
+  /* 3回跳ねて止まる */
+  --ease-out-bounce: linear(0, 0.015 4.5%, 0.061 9%, 0.096 11.3%, 0.143 13.8%, 0.252 18.3%, 0.391 22.8%, 0.562 27.3%, 0.762 31.8%, 0.874 34%, 1 36.4%, 0.939 38.8%, 0.889 41%, 0.812 45.5%, 0.766 50%, 0.75 54.5%, 0.765 59%, 0.811 63.5%, 0.887 68%, 0.937 70.3%, 1 72.7%, 0.953 77.3%, 0.938 81.8%, 0.952 86.3%, 0.971 88.5%, 1 90.9%, 0.984 95.5%, 1);
+
+  /* 行き過ぎを繰り返しながら止まる */
+  --ease-out-elastic: linear(0, 0.039 0.5%, 0.087 1%, 0.205 2%, 0.38 3.3%, 0.722 5.5%, 0.868 6.5%, 1 7.5%, 1.115 8.5%, 1.189 9.3%, 1.231 9.8%, 1.299 10.8%, 1.344 11.8%, 1.371 13%, 1.372 13.8%, 1.364 14.5%, 1.347 15.3%, 1.313 16.3%, 1.245 17.8%, 1.035 21.8%, 0.979 23%, 0.941 24%, 0.894 25.8%, 0.87 27.8%, 0.87 29.3%, 0.883 30.8%, 1.011 38.3%, 1.035 40.5%, 1.046 42.8%, 1.041 45.8%, 0.996 53.3%, 0.984 57.5%, 1.006 72.3%, 0.998 86.8%, 1);
+}
+```
+
+`cubic-bezier()`のBack（1回だけ行き過ぎる）と、`linear()`によるBounce・Elasticを比べてみましょう。
+
+<p class="codepen" data-height="420" data-pen-title="css-easing-demo-05" data-version="2" data-default-tab="result" data-slug-hash="TODO-05" data-user="smsmdsgn" style="height: 420px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 2px solid; margin: 1em 0; padding: 1em;">
+  <span>See the Pen <a href="https://codepen.io/smsmdsgn/pen/TODO-05">
+  css-easing-demo-05</a> by SHIMASHIMA DESIGN (<a href="https://codepen.io/smsmdsgn">@smsmdsgn</a>)
+  on <a href="https://codepen.io">CodePen</a>.</span>
+</p>
+
+古いブラウザへの対応が必要な場合は、`@supports`で切り替えます。
+
+```css
+.ball {
+  animation-timing-function: var(--ease-out-back);
+}
+
+@supports (animation-timing-function: linear(0, 1)) {
+  .ball {
+    animation-timing-function: var(--ease-out-bounce);
+  }
+}
+```
+
+同じセレクターに2つの宣言を続けて書く方法（後の宣言が無効なら前の宣言が使われる）は、値がカスタムプロパティの場合は使えません。`var()`を含む宣言は読み込み時点では有効と判断されるため、非対応のブラウザでは前の宣言ではなく初期値の`ease`になってしまいます。
+
+バウンスや弾性は目を引く分、多用すると操作の邪魔になります。web.devでも、プロジェクトの雰囲気に合う場面に限って控えめに使うよう勧められています。
+
+## 注意点
+
+### 動きを減らす設定に対応する
+
+OSのアクセシビリティ設定で「動きを減らす」系の項目をオンにしているユーザーがいます。前庭障害などにより、画面上の大きな動きでめまいや吐き気を感じる人がいるためです。この設定は、メディアクエリの`prefers-reduced-motion`で検出できます。
+
+WCAG 2.2の達成基準2.3.3（レベルAAA）でも、操作をきっかけに起こる動きのアニメーションは、機能や情報の伝達に不可欠な場合を除いて無効にできるべきだとされています。
+
+設定がオンのときにアニメーションをすべて止める必要はありません。移動や拡大縮小をやめて、フェードだけに置き換える方法がよく使われます。
+
+```css
+.toast {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 0.2s linear,
+    transform 0.2s var(--ease-in-quint);
+}
+
+.toast.is-open {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 0.4s linear,
+    transform 0.4s var(--ease-out-quint);
+}
+
+/* 動きを減らす設定では、移動をやめてフェードだけにする */
+@media (prefers-reduced-motion: reduce) {
+  .toast,
+  .toast.is-open {
+    transform: none;
+  }
+}
+```
+
+行き過ぎの大きいElasticやBounceは、特に注意が必要です。設定がオンのときは、通常の減速カーブに置き換えましょう。
+
+### アニメーションさせるプロパティを絞る
+
+イージングの選び方とは別に、何をアニメーションさせるかも動きのなめらかさを左右します。`width`・`height`・`top`・`left`などを変化させると、フレームごとにレイアウトの再計算や再描画が発生し、動きがかくつく原因になります。
+
+web.devのガイドでも、アニメーションはできる限り`transform`と`opacity`に限定することが推奨されています。位置や大きさの変化は、`transform`の`translate()`や`scale()`で表現しましょう。`transform`による移動はレイアウトシフトにもならないため、[Core Web Vitals](/ja/blog/core-web-vitals-metrics/)のCLSにも影響しません。
+
+## まとめ
+
+イージングは、経過時間を変化の進み具合に変換する関数です。CSSでは`ease`などのキーワードのほか、`cubic-bezier()`で独自の曲線を、`linear()`でバウンスのような複雑な動きを、`steps()`で段階的な切り替えを表現できます。
+
+選び方の基本は、画面に入る要素は減速、出ていく要素は加速、画面内での移動は加減速、フェードや継続的な動きは等速です。時間は200〜500ミリ秒を目安に、退場は登場より短くしましょう。
+
+あわせて、動きを減らす設定への対応と、`transform`・`opacity`を中心にしたプロパティの選択を意識すれば、見た目が良いだけでなく、誰にとっても快適に使えるアニメーションになります。
+
+<script async src="https://public.codepenassets.com/embed/index.js"></script>
+</section>

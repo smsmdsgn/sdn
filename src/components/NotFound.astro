@@ -1,0 +1,21 @@
+---
+// 404 ページの中身（共通の /404.html と、言語別の /{locale}/404.html で使う）
+import Layout from "../layouts/Layout.astro";
+import { DEFAULT_LOCALE } from "../i18n/ui.js";
+import { useTranslations } from "../i18n/utils.js";
+
+// homeHref: 「ホームページに戻る」のリンク先（省略時はその言語のトップ）
+const { homeHref } = Astro.props as { homeHref?: string };
+const locale = Astro.currentLocale ?? DEFAULT_LOCALE;
+const t = useTranslations(locale);
+const title = t("notFound.title");
+---
+
+<Layout title={title} isNotFound>
+	<section class="not-found">
+		<h1 class="not-found__title">{title}</h1>
+		<p class="not-found__home">
+			<a href={homeHref ?? `/${locale}/`}>{t("notFound.home")}</a>
+		</p>
+	</section>
+</Layout>

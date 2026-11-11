@@ -1,0 +1,75 @@
+---
+import { getBlogPosts } from "../data/blog.js";
+import { DEFAULT_LOCALE } from "../i18n/ui.js";
+import { formatDate, useTranslations } from "../i18n/utils.js";
+
+const locale = Astro.currentLocale ?? DEFAULT_LOCALE;
+const t = useTranslations(locale);
+const title = t("blog.title");
+const readMoreLabel = t("blog.readMore");
+
+const posts = getBlogPosts(locale).map((post) => ({
+	...post,
+	createdAtLabel: formatDate(post.createdAt, locale),
+}));
+---
+
+<div class="blog-index">
+	<h1 class="blog-index__title">{title}</h1>
+	{posts.length === 0 ? (
+	<p class="blog-index__empty">{t("blog.empty")}</p>
+	) : (
+	<ul class="blog-index__list">
+		{
+			posts.map((post) => (
+				<li class="blog-item">
+					<a href={post.url}>
+						<span class="blog-item__thumbnail-wrap">
+							{
+								post.thumbnail ? (
+									<img
+										src={post.thumbnail}
+										alt={post.title}
+										class="blog-item__thumbnail"
+										width="1200"
+										height="630"
+										loading="lazy"
+										decoding="async"
+									/>
+								) : (
+									<span
+										class="blog-item__thumbnail-placeholder"
+										aria-hidden="true"
+									></span>
+								)
+							}
+						</span>
+						<h2 class="blog-item__title">{post.title}</h2>
+					</a>
+					<div class="blog-item__info">
+						<a
+							href={post.authorUrl}
+							class="blog-item__author"
+							target="_blank"
+							rel="noopener noreferrer nofollow"
+						>
+							<img
+								src="/assets/img/author/author-shimashima.svg"
+								alt="Author Shimashima"
+							/>
+							<span class="external-link">{post.author}</span>
+						</a>
+						<time class="blog-item__date" datetime={post.createdAt}>
+							{post.createdAtLabel}
+						</time>
+					</div>
+					<p class="blog-item__desc">{post.desc}</p>
+					<a href={post.url} class="blog-item__read">
+						{readMoreLabel}
+					</a>
+				</li>
+			))
+		}
+	</ul>
+	)}
+</div>

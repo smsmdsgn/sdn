@@ -1,0 +1,12 @@
+---
+// カテゴリーページ（中身は未作成。名前は categories.js の定義を使う）
+import Layout from "../../../layouts/Layout.astro";
+import SectionIndex from "../../../components/SectionIndex.astro";
+import { getCategory } from "../../../data/categories.js";
+
+const { label: title } = getCategory("accessibility");
+---
+
+<Layout title={title}>
+	<SectionIndex title={title} />
+</Layout>

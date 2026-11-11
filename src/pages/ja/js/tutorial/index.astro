@@ -1,0 +1,113 @@
+---
+import Layout from "../../../../layouts/Layout.astro";
+import SectionIndex from "../../../../components/SectionIndex.astro";
+
+const title = "チュートリアル";
+
+const sections = [
+	{
+		heading: "初級編",
+		items: [
+			{
+				label: "JavaScript入門",
+				href: "/ja/js/tutorial/beginner/introduction/",
+			},
+			{
+				label: "文法とデータ型",
+				href: "/ja/js/tutorial/beginner/grammar-and-types/",
+			},
+			{
+				label: "制御フローとエラー処理",
+				href: "/ja/js/tutorial/beginner/control-flow-and-error-handling/",
+			},
+			{
+				label: "ループとイテレータ",
+				href: "/ja/js/tutorial/beginner/loops-and-iteration/",
+			},
+			{
+				label: "関数",
+				href: "/ja/js/tutorial/beginner/functions/",
+			},
+			{
+				label: "式と演算子",
+				href: "/ja/js/tutorial/beginner/expressions-and-operators/",
+			},
+			{
+				label: "数値と文字列",
+				href: "/ja/js/tutorial/beginner/numbers-and-strings/",
+			},
+			{
+				label: "日付と時刻",
+				href: "/ja/js/tutorial/beginner/dates-and-times/",
+			},
+			{
+				label: "正規表現",
+				href: "/ja/js/tutorial/beginner/regular-expressions/",
+			},
+			{
+				label: "インデックス付きコレクション",
+				href: "/ja/js/tutorial/beginner/indexed-collections/",
+			},
+			{
+				label: "キー付きコレクション",
+				href: "/ja/js/tutorial/beginner/keyed-collections/",
+			},
+			{
+				label: "オブジェクト",
+				href: "/ja/js/tutorial/beginner/objects/",
+			},
+			{
+				label: "クラス",
+				href: "/ja/js/tutorial/beginner/classes/",
+			},
+			{
+				label: "プロミス",
+				href: "/ja/js/tutorial/beginner/promises/",
+			},
+			{
+				label: "型付き配列",
+				href: "/ja/js/tutorial/beginner/typed-array/",
+			},
+			{
+				label: "イテレーターとジェネレーター",
+				href: "/ja/js/tutorial/beginner/iterators-and-generators/",
+			},
+			{
+				label: "リソース管理",
+				href: "/ja/js/tutorial/beginner/resource-management/",
+			},
+			{
+				label: "国際化",
+				href: "/ja/js/tutorial/beginner/internationalization/",
+			},
+			{
+				label: "モジュール",
+				href: "/ja/js/tutorial/beginner/modules/",
+			},
+		],
+	},
+	{ heading: "中級編", items: [] },
+	{ heading: "上級編", items: [] },
+];
+---
+
+<Layout title={title}>
+	<SectionIndex title={title}>
+		{
+			sections.map((section) => (
+				<section>
+					<h2>{section.heading}</h2>
+					{section.items.length > 0 ? (
+						<ul>
+							{section.items.map((item) => (
+								<li>
+									<a href={item.href}>{item.label}</a>
+								</li>
+							))}
+						</ul>
+					) : null}
+				</section>
+			))
+		}
+	</SectionIndex>
+</Layout>

@@ -1,0 +1,28 @@
+---
+// ルート（/）: 前回選んだ言語（Layout が localStorage に保存）か、既定言語のトップへ転送する
+import { DEFAULT_LOCALE, LOCALES } from "../i18n/ui.js";
+
+const fallback = `/${DEFAULT_LOCALE}/`;
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width" />
+		<meta name="robots" content="noindex" />
+		<link rel="canonical" href={fallback} />
+		<title>SDN</title>
+		<script is:inline define:vars={{ fallback, locales: LOCALES }}>
+			let saved = null;
+			try {
+				saved = localStorage.getItem("preferredLocale");
+			} catch {}
+			location.replace(locales.includes(saved) ? `/${saved}/` : fallback);
+		</script>
+		<noscript><meta http-equiv="refresh" content={`0; url=${fallback}`} /></noscript>
+	</head>
+	<body>
+		<a href={fallback}>{fallback}</a>
+	</body>
+</html>
