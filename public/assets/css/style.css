@@ -1272,7 +1272,8 @@ body.is-scroll-locked {
         grid-template-rows: auto; */
     }
 
-    .aside-menu.is-open + .main {
+    /* 目次があるページは、開いたメニューを目次の上に重ねる。目次がないページだけ本文を右の列へずらす */
+    .aside-menu.is-open + .main:not(:has(.aside-toc)) {
         grid-column: 2;
     }
 
