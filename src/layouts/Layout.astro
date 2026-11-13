@@ -681,6 +681,39 @@ const MENU_EXTRA = [
             ) : null
         }
 
+        {
+            isHome ? (
+                <div class="ad ad--middle">
+                    <div class="ad__wrapper">
+                        <div class="ad__middle-inner">
+                            <a href="#" class="ad__body">
+                                <picture>
+                                    <source
+                                        srcset="/assets/img/banner-03.avif"
+                                        type="image/avif"
+                                    />
+                                    <img
+                                        src="/assets/img/banner-03.jpg"
+                                        alt="Advertisement banner"
+                                        width="1920"
+                                        height="500"
+                                    />
+                                </picture>
+                            </a>
+                            <a href="#" class="ad__label">{t("ad.label")}</a>
+                            <button
+                                type="button"
+                                class="ad__close-btn"
+                                aria-label="Close ad"
+                            >
+                                <span class="sr-only">Ad Close</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            ) : null
+        }
+
         <div class="layout-main">
             <div
                 class="layout-main-wrapper"

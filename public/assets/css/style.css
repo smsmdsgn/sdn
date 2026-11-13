@@ -1907,6 +1907,48 @@ body.is-scroll-locked {
     grid-column: 1 / -1;
 }
 
+/* Ad: Middle（ホームのヒーロー直下） */
+/* 広告の帯（ライト・ダークで切り替わる）。下の余白は .index__title の margin-top (2rem) で空く */
+.ad--middle .ad__wrapper {
+    border-bottom: none;
+    padding-block: 1rem;
+    background-color: var(--color-background-sub);
+}
+
+.ad--middle .ad__middle-inner {
+    display: grid;
+    grid-template-columns: 1fr 1.5rem 1.5rem;
+    grid-template-rows: min-content 1fr;
+    padding-inline: 1rem;
+    max-width: calc(970px + 1.5rem);
+    margin-inline: auto;
+}
+
+.ad--middle .ad__label {
+    grid-row: 1;
+    grid-column: 2;
+}
+
+.ad--middle .ad__close-btn {
+    grid-row: 1;
+    grid-column: 3;
+}
+
+.ad--middle .ad__body {
+    padding-block: 0;
+    grid-row: 2;
+    grid-column: 1 / -1;
+}
+
+.ad--middle img {
+    display: block;
+    width: 100%;
+    max-width: 970px;
+    height: auto;
+    max-height: 250px;
+    object-fit: cover;
+}
+
 /* Ad: Side */
 .ad--side {
     margin-block: 1.5rem 2rem;
@@ -2029,6 +2071,27 @@ position: absolute;
     }
 
     .ad--bottom .ad__body {
+        grid-column: 1;
+        grid-row: 1;
+    }
+
+    .ad--middle .ad__middle-inner {
+        grid-template-columns: 1fr 1.5rem;
+        grid-template-rows: min-content;
+    }
+
+    .ad--middle .ad__close-btn {
+        grid-column: 2;
+    }
+
+    .ad--middle .ad__label {
+        grid-column: 1;
+        align-self: start;
+        justify-self: end;
+        margin-inline-end: 0.25rem;
+    }
+
+    .ad--middle .ad__body {
         grid-column: 1;
         grid-row: 1;
     }
