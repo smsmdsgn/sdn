@@ -22,6 +22,8 @@ export const ui = {
 		// 文と文の区切り（英語は半角スペース、日本語・中国語は区切りなし）
 		"sentence.separator": " ",
 		"header.theme": "Theme",
+		"hero.title.line1": "Resources for Shimashima,",
+		"hero.title.line2": "by Shimashima",
 		"hero.lead.pre": "A curated collection of docs on ",
 		"hero.lead.mid": ", and ",
 		"hero.lead.post": ", and more that Shimashima has encountered. Thanks to ",
@@ -102,6 +104,8 @@ export const ui = {
 	ja: {
 		"sentence.separator": "",
 		"header.theme": "配色",
+		"hero.title.line1": "Shimashimaによる、",
+		"hero.title.line2": "Shimashimaのためのリソース",
 		"hero.lead.pre": "Shimashimaが出会った",
 		"hero.lead.mid": "や",
 		"hero.lead.post": "をはじめとする技術ドキュメントを集約しています。",
@@ -180,6 +184,8 @@ export const ui = {
 	"zh-cn": {
 		"sentence.separator": "",
 		"header.theme": "主题",
+		"hero.title.line1": "Shimashima的资源，",
+		"hero.title.line2": "由Shimashima打造",
 		"hero.lead.pre": "汇总Shimashima接触到的",
 		"hero.lead.mid": "和",
 		"hero.lead.post": "等技术文档。感谢",
