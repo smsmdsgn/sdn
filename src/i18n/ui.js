@@ -100,6 +100,23 @@ export const ui = {
 		"source.before": "This article is based on “",
 		"source.middle": "” from MDN. The original article is available under ",
 		"source.after": ".",
+		// Baseline ボックス（{date} は baseline.date で整形した年月）
+		"baseline.status.widely": "Widely available",
+		"baseline.status.newly": "Newly available",
+		"baseline.status.limited": "Limited availability",
+		"baseline.desc.widely":
+			"This feature is well established and works across many devices and browser versions. It’s been available across browsers since {date}.",
+		"baseline.desc.newly":
+			"Since {date}, this feature works across the latest devices and browser versions. This feature might not work in older devices or browsers.",
+		"baseline.desc.limited":
+			"This feature is not Baseline because it does not work in some of the most widely-used browsers.",
+		// 使える値: {year}（2025）、{month}（11）、{monthName}（November）
+		"baseline.date": "{monthName} {year}",
+		"baseline.support.full": "Supported",
+		"baseline.support.partial": "Partially supported",
+		"baseline.support.none": "Not supported",
+		"baseline.caniuse": "See full compatibility (Go to “caniuse.com”)",
+		"baseline.learnMore": "Learn more",
 	},
 	ja: {
 		"sentence.separator": "",
@@ -180,6 +197,21 @@ export const ui = {
 		"source.before": "この記事はMDNの「",
 		"source.middle": "」を元に作成しました。元記事は ",
 		"source.after": " の下で提供されています。",
+		"baseline.status.widely": "広く利用可能",
+		"baseline.status.newly": "最近利用可能",
+		"baseline.status.limited": "利用可能性は限定的",
+		"baseline.desc.widely":
+			"この機能は広く実装されており、多くのバージョンの端末やブラウザーで動作します。{date}以降、すべてのブラウザーで利用可能です。",
+		"baseline.desc.newly":
+			"{date}以降、この機能は最新のバージョンの端末およびブラウザーで動作します。古い端末やブラウザーでは動作しないことがあります。",
+		"baseline.desc.limited":
+			"この機能はベースラインではありません。最も広く使用されているブラウザーの一部で動作しません。",
+		"baseline.date": "{year}年{month}月",
+		"baseline.support.full": "対応",
+		"baseline.support.partial": "一部対応",
+		"baseline.support.none": "未対応",
+		"baseline.caniuse": "完全な互換性情報を見る（caniuseに移動）",
+		"baseline.learnMore": "もっと詳しく",
 	},
 	"zh-cn": {
 		"sentence.separator": "",

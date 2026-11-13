@@ -9,41 +9,12 @@ createdAt: 2026-04-27
 updatedAt: 2026-04-27
 ---
 
+import Baseline from "../../../../../components/Baseline.astro";
+
 <section className="main__header">
 # overscroll-behavior property
 
-<details className="baseline-info baseline-info--limited">
-  <summary className="baseline-info__head">
-    <span className="baseline-info__status-icon" role="img"></span>
-    <span className="baseline-info__name">Baseline</span>
-    <p className="baseline-info__status-title">Limited availability</p>
-    <ul className="baseline-info__engine-list">
-      <li className="baseline-info__engine-item">
-        <span className="baseline-info__engine-icon" data-browser="chrome" data-supported="full"></span>
-        <span className="baseline-info__engine-icon" data-browser="edge" data-supported="full"></span>
-      </li>
-      <li className="baseline-info__engine-item">
-        <span className="baseline-info__engine-icon" data-browser="firefox" data-supported="full"></span>
-      </li>
-      <li className="baseline-info__engine-item">
-        <span className="baseline-info__engine-icon" data-browser="safari" data-supported="none"></span>
-      </li>
-    </ul>
-    <span className="baseline-info__toggle-icon"></span>
-  </summary>
-  <div className="baseline-info__body">
-    <p className="baseline-info__desc">This feature is not Baseline because it does not work in some of the most widely-used browsers.</p>
-    <p className="baseline-info__signal">Want more browser support for this feature? <a href="https://github.com/web-platform-dx/developer-signals/issues/567" className="external-link">Tell us why.</a></p>
-    <ul className="baseline-info__link-list">
-      <li className="baseline-info__link-item">
-        <a href="#" className="external-link">See full compatibility (Go to "caniuse.com")</a>
-      </li>
-      <li className="baseline-info__link-item">
-        <a href="/en-us/glossary/baseline/" target="_blank" rel="noopener noreferrer">Learn more</a>
-      </li>
-    </ul>
-  </div>
-</details>
+<Baseline status="limited" chrome="full" edge="full" firefox="full" safari="none" />
 
 The `overscroll-behavior` CSS property sets what a browser does when reaching the boundary of a scrolling area.
 </section>

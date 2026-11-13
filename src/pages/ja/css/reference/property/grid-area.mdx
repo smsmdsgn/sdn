@@ -9,40 +9,12 @@ createdAt: 2026-10-16
 updatedAt: 2026-10-16
 ---
 
+import Baseline from "../../../../../components/Baseline.astro";
+
 <section className="main__header">
 # grid-areaプロパティ
 
-<details className="baseline-info baseline-info--widely">
-  <summary className="baseline-info__head">
-    <span className="baseline-info__status-icon" role="img"></span>
-    <span className="baseline-info__name">Baseline</span>
-    <p className="baseline-info__status-title">広く利用可能</p>
-    <ul className="baseline-info__engine-list">
-      <li className="baseline-info__engine-item">
-        <span className="baseline-info__engine-icon" data-browser="chrome" data-supported="full"></span>
-        <span className="baseline-info__engine-icon" data-browser="edge" data-supported="full"></span>
-      </li>
-      <li className="baseline-info__engine-item">
-        <span className="baseline-info__engine-icon" data-browser="firefox" data-supported="full"></span>
-      </li>
-      <li className="baseline-info__engine-item">
-        <span className="baseline-info__engine-icon" data-browser="safari" data-supported="full"></span>
-      </li>
-    </ul>
-    <span className="baseline-info__toggle-icon"></span>
-  </summary>
-  <div className="baseline-info__body">
-    <p className="baseline-info__desc">この機能は広く実装されており、多くのバージョンの端末やブラウザーで動作します。2017年10月以降、すべてのブラウザーで利用可能です。</p>
-    <ul className="baseline-info__link-list">
-      <li className="baseline-info__link-item">
-        <a href="#" className="external-link">完全な互換性情報を見る（caniuseに移動）</a>
-      </li>
-      <li className="baseline-info__link-item">
-        <a href="/ja/glossary/baseline/" target="_blank" rel="noopener noreferrer">もっと詳しく</a>
-      </li>
-    </ul>
-  </div>
-</details>
+<Baseline status="widely" since="2017-10" chrome="full" edge="full" firefox="full" safari="full" />
 
 `grid-area`は[CSS](#)の[一括指定プロパティ](#)で、グリッドアイテムの寸法と[グリッド](#)内での位置を指定し、グリッド配置に線や区間を指定したり、何も指定しなかったり（自動）することで、[グリッド領域](#)の端を指定します。
 </section>

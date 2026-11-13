@@ -1,0 +1,112 @@
+---
+// Baseline ボックス（機能のブラウザー対応状況）
+// 例: <Baseline status="newly" since="2025-11" chrome="full" edge="full" firefox="full" safari="full" />
+import { DEFAULT_LOCALE } from "../i18n/ui.js";
+import { useTranslations } from "../i18n/utils.js";
+
+type Status = "widely" | "newly" | "limited";
+type Support = "full" | "partial" | "none";
+
+export type Props = {
+	status: Status;
+	// Baseline になった年月（"2025-11" 形式）。widely・newly で必須
+	since?: string;
+	chrome: Support;
+	edge: Support;
+	firefox: Support;
+	safari: Support;
+	// caniuse.com の機能 ID（https://caniuse.com/<ID>）。省略時はリンク先なし（#）
+	caniuse?: string;
+};
+
+const STATUSES: Status[] = ["widely", "newly", "limited"];
+const SUPPORTS: Support[] = ["full", "partial", "none"];
+
+const { status, since, chrome, edge, firefox, safari, caniuse } =
+	Astro.props as Props;
+const locale = Astro.currentLocale ?? DEFAULT_LOCALE;
+const t = useTranslations(locale);
+
+// 指定ミスは表示崩れに気づきにくいので、ビルド時にエラーにする
+if (!STATUSES.includes(status)) {
+	throw new Error(
+		`Baseline: status は ${STATUSES.join(" / ")} のいずれかを指定してください（受け取った値: ${status}）`,
+	);
+}
+
+const supports = { chrome, edge, firefox, safari };
+for (const [browser, support] of Object.entries(supports)) {
+	if (!SUPPORTS.includes(support)) {
+		throw new Error(
+			`Baseline: ${browser} は ${SUPPORTS.join(" / ")} のいずれかを指定してください（受け取った値: ${support}）`,
+		);
+	}
+}
+
+// "2025-11" → 言語別の年月表記（ja: 2025年11月 / en-us: November 2025）
+let date = "";
+if (status !== "limited") {
+	const match = String(since ?? "").match(/^(\d{4})-(0[1-9]|1[0-2])$/);
+	if (!match) {
+		throw new Error(
+			`Baseline: status="${status}" のときは since を "2025-11" の形式で指定してください（受け取った値: ${since}）`,
+		);
+	}
+	const year = Number(match[1]);
+	const month = Number(match[2]);
+	const monthName = new Intl.DateTimeFormat("en-US", {
+		month: "long",
+		timeZone: "UTC",
+	}).format(new Date(Date.UTC(year, month - 1, 1)));
+	date = t("baseline.date", { year, month, monthName });
+}
+
+// 表示グループ（Chrome と Edge は同じエンジンなので1つにまとめる）
+const engineGroups = [["chrome", "edge"], ["firefox"], ["safari"]] as const;
+const browserNames = {
+	chrome: "Chrome",
+	edge: "Edge",
+	firefox: "Firefox",
+	safari: "Safari",
+};
+
+const caniuseHref = caniuse ? `https://caniuse.com/${caniuse}` : "#";
+const learnMoreHref = `/${locale}/glossary/baseline/`;
+---
+
+<details class={`baseline-info baseline-info--${status}`}>
+	<summary class="baseline-info__head">
+		<span class="baseline-info__status-icon" aria-hidden="true"></span>
+		<span class="baseline-info__name">Baseline</span>
+		<span class="baseline-info__status-title">{t(`baseline.status.${status}`)}</span>
+		<ul class="baseline-info__engine-list">
+			{
+				engineGroups.map((group) => (
+					<li class="baseline-info__engine-item">
+						{group.map((browser) => (
+							<span
+								class="baseline-info__engine-icon"
+								data-browser={browser}
+								data-supported={supports[browser]}
+								role="img"
+								aria-label={`${browserNames[browser]}: ${t(`baseline.support.${supports[browser]}`)}`}
+							/>
+						))}
+					</li>
+				))
+			}
+		</ul>
+		<span class="baseline-info__toggle-icon" aria-hidden="true"></span>
+	</summary>
+	<div class="baseline-info__body">
+		<p class="baseline-info__desc">{t(`baseline.desc.${status}`, { date })}</p>
+		<ul class="baseline-info__link-list">
+			<li class="baseline-info__link-item">
+				<a href={caniuseHref} class="external-link">{t("baseline.caniuse")}</a>
+			</li>
+			<li class="baseline-info__link-item">
+				<a href={learnMoreHref} target="_blank" rel="noopener noreferrer">{t("baseline.learnMore")}</a>
+			</li>
+		</ul>
+	</div>
+</details>
