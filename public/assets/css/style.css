@@ -1,6 +1,70 @@
 @charset "UTF-8";
 
 /**********************
+* Fonts
+**********************/
+/* Inter（可変: opsz 14–32 / wght 100–900） */
+@font-face {
+    font-family: "Inter";
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url("/assets/fonts/InterVariable.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "Inter";
+    font-style: italic;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url("/assets/fonts/InterVariable-Italic.woff2") format("woff2");
+}
+
+/* JetBrains Mono（静的: 400 / 700） */
+@font-face {
+    font-family: "JetBrains Mono";
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    size-adjust: 95%;
+    src: url("/assets/fonts/JetBrainsMono-Regular.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "JetBrains Mono";
+    font-style: italic;
+    font-weight: 400;
+    font-display: swap;
+    size-adjust: 95%;
+    src: url("/assets/fonts/JetBrainsMono-Italic.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "JetBrains Mono";
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    size-adjust: 95%;
+    src: url("/assets/fonts/JetBrainsMono-Bold.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "JetBrains Mono";
+    font-style: italic;
+    font-weight: 700;
+    font-display: swap;
+    size-adjust: 95%;
+    src: url("/assets/fonts/JetBrainsMono-BoldItalic.woff2") format("woff2");
+}
+
+/* Inter の ss02（l / I / 1 などを判別しやすい字形）に名前を付ける */
+@font-feature-values "Inter" {
+    @styleset {
+        disambiguation: 2;
+    }
+}
+
+/**********************
 * Common
 **********************/
 :root {
@@ -118,6 +182,8 @@
 
 body {
     font-family: "Inter", sans-serif;
+    font-feature-settings: "calt" 0;
+    font-variant-alternates: styleset(disambiguation);
 }
 
 code {
