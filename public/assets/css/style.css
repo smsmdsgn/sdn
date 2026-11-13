@@ -98,7 +98,9 @@
 
     --color-baseline-bg: #f8f4f5;
     --color-baseline-bg-border: var(--color-border);
-    --color-baseline-engine-bg: #e9e6e7;
+    --color-baseline-engine-bg: rgba(0, 0, 0, 0.06);
+    --color-baseline-check--widely: #006e32;
+    --color-baseline-check--newly: #0152b4;
     --color-baseline-widely: #1f8e3e;
     --color-baseline-newly: #1a73e8;
     --color-baseline-limited: #ea8600;
@@ -157,7 +159,9 @@
     --color-code-bg: #2d3034;
 
     --color-baseline-bg: #282a2c;
-    --color-baseline-engine-bg: #1d1e1f;
+    --color-baseline-engine-bg: rgba(255, 255, 255, 0.06);
+    --color-baseline-check--widely: #79d89d;
+    --color-baseline-check--newly: #97c2ff;
     --color-baseline-gray: #bec0c3;
     --color-baseline-bg--widely: #002a13;
     --color-baseline-bg-border--widely: #004d25 ;
@@ -2260,11 +2264,15 @@ position: absolute;
     position: absolute;
     top: 50%;
     right: 0;
-    transform: translateY(-50%);
+    translate: 0 -50%;
     mask-image: url(/assets/img/icon-down.svg);
     background-color: var(--color-text-sub);
     width: var(--chevron-size);
     height: var(--chevron-size);
+}
+
+.baseline-info[open] .baseline-info__toggle-icon {
+    rotate: 180deg;
 }
 
 .baseline-info__desc {
@@ -2335,11 +2343,11 @@ position: absolute;
 }
 
 [data-supported="full"].baseline-info__engine-icon::after {
-    background-color: var(--color-baseline-widely);
+    background-color: var(--color-baseline-check--widely);
 }
 
 .baseline-info--newly [data-supported="full"].baseline-info__engine-icon::after {
-    background-color: var(--color-baseline-newly);
+    background-color: var(--color-baseline-check--newly);
 }
 
 .baseline-info--limited [data-supported="full"].baseline-info__engine-icon::after {
@@ -2362,12 +2370,15 @@ position: absolute;
 .baseline-info__link-list {
     display: flex;
     flex-wrap: wrap;
+    justify-content: space-between;
     gap: 1rem 1.5rem;
     list-style-type: none !important;
     padding-inline-start: 0 !important;
+    margin-block-end: 0 !important;
 }
 
 .baseline-info__link-item {
+    font-size: 0.8rem;
     font-weight: 500;
 }
 
