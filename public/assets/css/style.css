@@ -184,11 +184,20 @@ body {
     font-family: "Inter", sans-serif;
     font-feature-settings: "calt" 0;
     font-variant-alternates: styleset(disambiguation);
+    /* CJKと英字の間に自動で隙間を空ける（ideograph-alpha未対応のChromeはnormalで代替） */
+    text-autospace: normal;
+    text-autospace: ideograph-alpha;
 }
 
 code {
     font-family: "JetBrains Mono", monospace;
     font-size: 1rem;
+}
+
+/* 等幅の桁揃えを崩さない／インラインcodeの余白と二重にしない */
+pre,
+code {
+    text-autospace: no-autospace;
 }
 
 summary {
