@@ -15,7 +15,7 @@ export type Props = {
 	edge: Support;
 	firefox: Support;
 	safari: Support;
-	// caniuse.com の機能 ID（https://caniuse.com/<ID>）。省略時はリンク先なし（#）
+	// caniuse.com の検索語（https://caniuse.com/?search=<検索語>）。全言語共通。省略時はリンクを出さない
 	caniuse?: string;
 };
 
@@ -70,7 +70,10 @@ const browserNames = {
 	safari: "Safari",
 };
 
-const caniuseHref = caniuse ? `https://caniuse.com/${caniuse}` : "#";
+const caniuseQuery = String(caniuse ?? "").trim();
+const caniuseHref = caniuseQuery
+	? `https://caniuse.com/?search=${encodeURIComponent(caniuseQuery)}`
+	: "";
 const learnMoreHref = `/${locale}/glossary/baseline/`;
 ---
 
@@ -101,9 +104,13 @@ const learnMoreHref = `/${locale}/glossary/baseline/`;
 	<div class="baseline-info__body">
 		<p class="baseline-info__desc">{t(`baseline.desc.${status}`, { date })}</p>
 		<ul class="baseline-info__link-list">
-			<li class="baseline-info__link-item">
-				<a href={caniuseHref} class="external-link">{t("baseline.caniuse")}</a>
-			</li>
+			{
+				caniuseHref && (
+					<li class="baseline-info__link-item">
+						<a href={caniuseHref} class="external-link" target="_blank" rel="noopener noreferrer">{t("baseline.caniuse")}</a>
+					</li>
+				)
+			}
 			<li class="baseline-info__link-item">
 				<a href={learnMoreHref} target="_blank" rel="noopener noreferrer">{t("baseline.learnMore")}</a>
 			</li>

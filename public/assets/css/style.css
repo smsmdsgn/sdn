@@ -2383,6 +2383,11 @@ position: absolute;
     font-weight: 500;
 }
 
+/* caniuseのリンクがないときも「もっと詳しく」を右下に置く */
+.baseline-info__link-item:only-child {
+    margin-inline-start: auto;
+}
+
 .baseline-info__link-item .external-link {
     display: inline;
 }
